@@ -44,7 +44,7 @@ Around everything: GitHub repo · GitHub Actions checks · GitHub Projects board
 | Warehouse | BigQuery sandbox (US multi-region) | Stores data, runs SQL. Free, no billing account |
 | Setup | Python setup script | Creates/deletes the dataset, so it can be rebuilt any time |
 | Ingestion | Python + `google-cloud-bigquery` | Loads CSVs into raw tables |
-| Transformation | dbt Core (latest **stable** 1.x, not the 2.0 alpha) | Cleans data, builds tables, runs data tests |
+| Transformation | dbt Core **1.12.x** (dbt-core and dbt-bigquery pinned; not v2) | Cleans data, builds tables, runs data tests |
 | Dashboard | Looker Studio | Charts for the findings; connects with your Google login, no keys |
 | Automation | GitHub Actions | Lint and secret-scan every push; holds **no** cloud credentials |
 | Project management | GitHub Issues + Projects board | One issue per increment, tracked To do → Done |
@@ -53,7 +53,7 @@ Around everything: GitHub repo · GitHub Actions checks · GitHub Projects board
 
 - One issue at a time, each on its own branch, merged into `main` through a reviewed pull request.
 - Every issue follows the loop in Section 6 and passes the security checklist in Section 7.
-- Decisions are recorded in Section 11 when they're made, not afterwards.
+- Decisions are recorded in Section 12 when they're made, not afterwards.
 - The owner handles all logins and credentials personally and reviews every change before merging.
 
 ## 6. The working loop: Build → Test → Reverse → Refactor
@@ -89,7 +89,7 @@ Test: row counts in BigQuery match the CSVs. Reverse: drop all raw tables, reloa
 
 ### Milestone 3 — Transformation & Data Modeling (≈ 20 hours · target: late January 2027)
 **Goal:** dbt staging and mart models with passing data tests.
-Test: `dbt build` passes (unique IDs, no empty keys, every order links to a customer). Reverse: drop all dbt tables, rebuild from nothing. Add dbt parse/compile check to GitHub Actions (still no credentials).
+Test: `dbt build` passes (unique IDs, no empty keys, every order links to a customer). Reverse: drop all dbt tables, rebuild from nothing. Add dbt parse check to GitHub Actions (still no credentials).
 
 ### Milestone 4 — Analytics & Dashboard (≈ 15 hours · target: late February 2027)
 **Goal:** business metrics answering the question, shown in Looker Studio.
@@ -171,7 +171,49 @@ Test: passes on real data. Reverse: break one count on purpose and it fails.
 
 ---
 
-## 11. Decision log
+## 11. Milestone 3 issues (copy each into GitHub Issues)
+
+Each issue uses the same checklist as Section 9.
+
+**M3-01 · Install dbt and connect to BigQuery**
+dbt-core and dbt-bigquery each pinned explicitly to a 1.12.x version (both the `dbt` and `dbt-core` package names now have v2 releases, so an unpinned install can pull v2); dbt project created in `dbt/`; `profiles.yml` kept outside the repo, using gcloud login (no keys) and the project ID from an environment variable; dbt builds into its own datasets, never into the raw one; `target/`, `logs/` and `dbt_packages/` gitignored.
+Test: `dbt --version` shows Core 1.12.x and the bigquery plugin 1.12.x; `dbt debug` passes. Reverse: delete the environment, recreate it with one command, `dbt --version` and `dbt debug` still pass.
+
+**M3-02 · Investigate the raw data**
+One-off queries, results written to `docs/data-notes.md`: for each column, are blanks NULL or empty text; date formats; duplicate `review_id`s; geolocation duplicates; `customer_id` vs `customer_unique_id`.
+Test: every question in the notes has an answer and the query that produced it. Reverse: n/a.
+
+**M3-03 · Sources and the first staging model**
+Declare the 9 raw tables as dbt sources. Build `stg_orders`: real timestamp types, blanks handled per M3-02, tests on `order_id` (unique, not null).
+Test: `dbt build --select stg_orders` passes. Reverse: drop the dbt datasets, rebuild, passes again.
+
+**M3-04 · Remaining staging models**
+The other 8 staging models, same pattern. Includes the test that every order links to a customer.
+Test: `dbt build` passes for all staging. Reverse: break one rule on purpose (e.g. test a non-unique column as unique); the build fails.
+
+**M3-05 · Customer mart: `dim_customers`**
+One row per real person (`customer_unique_id`): first and last order date, number of orders, repeat-customer flag, state.
+Test: unique key test passes; hand-check the repeat-customer count with one direct SQL query. Reverse: drop and rebuild.
+
+**M3-06 · Order mart: `fct_orders`**
+One row per order: status, order value, payment total, delivery days, late flag, review score.
+Test: row count equals `stg_orders` (a custom test, to catch row duplication from joins). Reverse: drop and rebuild.
+
+**M3-07 · Item mart: `fct_order_items`**
+One row per item, with English product category and seller, for "which products and sellers cost us money."
+Test: row count equals `stg_order_items`. Reverse: drop and rebuild.
+
+**M3-08 · Full rebuild and documentation**
+Descriptions for every mart model and column; `dbt docs generate` works locally (output not committed).
+Test: `dbt build` from empty datasets passes in one command. Reverse: drop all dbt datasets, rebuild from the repo.
+
+**M3-09 · dbt check in GitHub Actions**
+Add `dbt parse` to CI with a dummy profile and no cloud credentials. `parse` checks the project without connecting to BigQuery; `compile` would need a connection, so it's left out.
+Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks go red; close it.
+
+---
+
+## 12. Decision log
 
 | Date | Decision | Why |
 |---|---|---|
@@ -180,7 +222,7 @@ Test: passes on real data. Reverse: break one count on purpose and it fails.
 | Oct 2026 | Python setup script instead of Terraform | Terraform matters little for analyst/PM roles; script keeps reproducibility with less to learn |
 | Oct 2026 | Looker Studio instead of Streamlit | No stored keys needed; no hosting to maintain |
 | Oct 2026 | GitHub Actions with zero cloud credentials | Automated quality and secret checks without any credential exposure |
-| Oct 2026 | dbt Core stable 1.x | 2.0 is still alpha; beginner needs stability |
+| Oct 2026 | dbt Core stable 1.x | 2.0 is still alpha; beginner needs stability (superseded below) |
 | Oct 2026 | Early commits pushed directly to main | Nothing to open a PR against yet; PR rule applies from M1-02 |
 | Oct 2026 | Ruleset instead of classic branch protection | Applies to admins too, through an empty bypass list |
 | Oct 2026 | Pull requests need 0 approvals | Solo project; GitHub doesn't allow approving your own PR |
@@ -201,8 +243,12 @@ Test: passes on real data. Reverse: break one count on purpose and it fails.
 | Oct 2026 | Raw tables load every column as STRING | Keeps data exactly as delivered (e.g. leading zeros in zip codes); types are fixed in dbt staging |
 | Oct 2026 | Loader replaces each raw table on every run (`WRITE_TRUNCATE`) | Running it twice gives the same table instead of duplicate rows |
 | Oct 2026 | Olist data never committed | CC BY-NC-SA 4.0 license; downloaded Oct 26, 2026; `data/` is gitignored |
+| Oct 2026 | dbt v1.12, with dbt-core and dbt-bigquery pinned explicitly to 1.12.x | v2 went GA Sept 2026 but is new; v1.12 is maintained until July 2027, past project end, and most learning material targets v1. Both the `dbt` and `dbt-core` package names have v2 releases, so an unpinned install can pull v2 |
+| Oct 2026 | dbt builds into its own datasets, separate from raw | "Drop all dbt tables" can never touch the loaded data |
+| Oct 2026 | No dbt packages; views and tables only | Built-in tests are enough; sandbox doesn't allow MERGE, so no incremental models |
+| Oct 2026 | CI runs `dbt parse`, not `compile` | `parse` needs no warehouse connection, keeping CI credential-free |
 
-## 12. Later (not in current scope)
+## 13. Later (not in current scope)
 
 - Cloud Storage raw bucket (needs billing + budget alert; free only in us-east1/us-west1/us-central1)
 - Scheduled pipeline runs
