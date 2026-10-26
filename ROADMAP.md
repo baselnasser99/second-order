@@ -161,6 +161,8 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 | Oct 2026 | Dependabot security updates off for now | No dependencies yet; revisit in M1-04 |
 | Oct 2026 | Milestone due dates set to the last day of each target period | Section 8 gives rough targets ("late November"); GitHub needs an exact date |
 | Oct 2026 | Project board is public | Lets reviewers and recruiters see how the work is tracked; it holds only issue titles and statuses |
+| Oct 2026 | Python pinned to 3.13 (`requires-python = "==3.13.*"`) | Newest version supported by dbt-core, dbt-bigquery and google-cloud-bigquery; pinned in `pyproject.toml` because `.gitignore` ignores `.python-version` |
+| Oct 2026 | Dependabot security updates stay off until M1-05 | M1-04 adds no libraries; turn on when the first one arrives |
 
 ## 11. Later (not in current scope)
 
