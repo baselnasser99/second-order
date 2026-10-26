@@ -16,6 +16,8 @@ jobs:
           fetch-depth: 0  # full history, so gitleaks can scan every commit
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+        with:
+          version: "0.13.5"  # same uv as local
       - run: uv sync --locked
       - run: uv run pre-commit run --all-files --show-diff-on-failure
       - run: uv run pre-commit run gitleaks-history --hook-stage manual --all-files
