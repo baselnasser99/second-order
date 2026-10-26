@@ -159,6 +159,8 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 | Oct 2026 | Ruleset instead of classic branch protection | Applies to admins too, through an empty bypass list |
 | Oct 2026 | Pull requests need 0 approvals | Solo project; GitHub doesn't allow approving your own PR |
 | Oct 2026 | Dependabot security updates off for now | No dependencies yet; revisit in M1-04 |
+| Oct 2026 | Milestone due dates set to the last day of each target period | Section 8 gives rough targets ("late November"); GitHub needs an exact date |
+| Oct 2026 | Project board is public | Lets reviewers and recruiters see how the work is tracked; it holds only issue titles and statuses |
 
 ## 11. Later (not in current scope)
 
