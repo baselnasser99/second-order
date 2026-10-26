@@ -129,6 +129,7 @@ data/
 *_key.json
 service-account*.json
 credentials*.json
+client_secret*.json
 application_default_credentials.json
 *.pem
 *.p12
