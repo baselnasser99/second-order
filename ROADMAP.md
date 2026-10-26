@@ -155,6 +155,10 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 | Oct 2026 | Looker Studio instead of Streamlit | No stored keys needed; no hosting to maintain |
 | Oct 2026 | GitHub Actions with zero cloud credentials | Automated quality and secret checks without any credential exposure |
 | Oct 2026 | dbt Core stable 1.x | 2.0 is still alpha; beginner needs stability |
+| Oct 2026 | First commit pushed directly to main | Nothing to open a PR against yet; PR rule applies from M1-02 |
+| Oct 2026 | Ruleset instead of classic branch protection | Applies to admins too, through an empty bypass list |
+| Oct 2026 | Pull requests need 0 approvals | Solo project; GitHub doesn't allow approving your own PR |
+| Oct 2026 | Dependabot security updates off for now | No dependencies yet; revisit in M1-04 |
 
 ## 11. Later (not in current scope)
 

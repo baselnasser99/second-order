@@ -132,6 +132,8 @@ credentials*.json
 application_default_credentials.json
 *.pem
 *.p12
+*.key
+id_rsa*
 
 # dbt build output
 dbt_packages/
