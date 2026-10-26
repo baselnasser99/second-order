@@ -199,6 +199,7 @@ Test: passes on real data. Reverse: break one count on purpose and it fails.
 | Oct 2026 | `.env` loaded with `uv run --env-file`, no python-dotenv | uv already reads env files; one less library to pin and audit |
 | Oct 2026 | Dataset delete refuses if any tables exist and asks for confirmation | Protects loaded data; BigQuery also enforces it (`delete_contents=False`) |
 | Oct 2026 | Raw tables load every column as STRING | Keeps data exactly as delivered (e.g. leading zeros in zip codes); types are fixed in dbt staging |
+| Oct 2026 | Loader replaces each raw table on every run (`WRITE_TRUNCATE`) | Running it twice gives the same table instead of duplicate rows |
 | Oct 2026 | Olist data never committed | CC BY-NC-SA 4.0 license; downloaded Oct 26, 2026; `data/` is gitignored |
 
 ## 12. Later (not in current scope)
