@@ -18,6 +18,14 @@ uv run --env-file .env scripts/load.py
 
 Each run replaces the tables, so running it again is safe.
 
+4. Check that every table has the same number of rows as its CSV:
+
+```bash
+uv run --env-file .env scripts/check_counts.py
+```
+
+It prints one line per table and exits with code 1 if any table is missing or its count differs.
+
 ## License
 
 [MIT](LICENSE)
