@@ -53,7 +53,7 @@ Around everything: GitHub repo · GitHub Actions checks · GitHub Projects board
 
 - One issue at a time, each on its own branch, merged into `main` through a reviewed pull request.
 - Every issue follows the loop in Section 6 and passes the security checklist in Section 7.
-- Decisions are recorded in Section 10 when they're made, not afterwards.
+- Decisions are recorded in Section 11 when they're made, not afterwards.
 - The owner handles all logins and credentials personally and reviews every change before merging.
 
 ## 6. The working loop: Build → Test → Reverse → Refactor
@@ -145,7 +145,33 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 
 ---
 
-## 10. Decision log
+## 10. Milestone 2 issues (copy each into GitHub Issues)
+
+Each issue uses the same checklist as Section 9.
+
+**M2-01 · Download the Olist data**
+From Kaggle into `data/raw/` (gitignored).
+Test: all 9 CSVs present and `git status` shows nothing new. Reverse: n/a.
+
+**M2-02 · Fix the delete script's exit code**
+Cancelling a delete exits with code 1, not success.
+Test: cancel a delete and check the exit code. Reverse: n/a.
+
+**M2-03 · Load one table**
+Loader script for `olist_orders_dataset.csv` into a raw table, all columns as STRING.
+Test: BigQuery row count matches the CSV, counted with a CSV reader rather than line counts. Reverse: drop the table and reload.
+
+**M2-04 · Load all tables with one command**
+All 9 files.
+Test: every row count matches. Reverse: drop all raw tables, reload, counts still match.
+
+**M2-05 · Row-count check**
+A script that compares CSV and BigQuery row counts and fails on any mismatch.
+Test: passes on real data. Reverse: break one count on purpose and it fails.
+
+---
+
+## 11. Decision log
 
 | Date | Decision | Why |
 |---|---|---|
@@ -172,8 +198,10 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 | Oct 2026 | Stay on BigQuery sandbox; tables expire after 60 days | Free with no billing; the pipeline rebuilds everything with one command, so rebuild before any demo |
 | Oct 2026 | `.env` loaded with `uv run --env-file`, no python-dotenv | uv already reads env files; one less library to pin and audit |
 | Oct 2026 | Dataset delete refuses if any tables exist and asks for confirmation | Protects loaded data; BigQuery also enforces it (`delete_contents=False`) |
+| Oct 2026 | Raw tables load every column as STRING | Keeps data exactly as delivered (e.g. leading zeros in zip codes); types are fixed in dbt staging |
+| Oct 2026 | Olist data never committed | CC BY-NC-SA 4.0 license; downloaded Oct 26, 2026; `data/` is gitignored |
 
-## 11. Later (not in current scope)
+## 12. Later (not in current scope)
 
 - Cloud Storage raw bucket (needs billing + budget alert; free only in us-east1/us-west1/us-central1)
 - Scheduled pipeline runs
