@@ -37,8 +37,7 @@ def delete(client: bigquery.Client, dataset_id: str) -> None:
         sys.exit(1)
     answer = input(f"Delete dataset {dataset_id}? Type 'yes' to confirm: ")
     if answer.strip().lower() != "yes":
-        print("Cancelled. Nothing was deleted.")
-        return
+        sys.exit("Cancelled. Nothing was deleted.")
     # delete_contents=False makes BigQuery itself refuse if a table appeared since the check above
     client.delete_dataset(dataset_id, delete_contents=False)
     print(f"Deleted dataset {dataset_id}.")
