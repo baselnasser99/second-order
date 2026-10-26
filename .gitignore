@@ -137,5 +137,9 @@ application_default_credentials.json
 id_rsa*
 
 # dbt build output
+target/
 dbt_packages/
 logs/
+# Real dbt profile lives in ~/.dbt/; only profiles.example.yml is committed
+profiles.yml
+.user.yml

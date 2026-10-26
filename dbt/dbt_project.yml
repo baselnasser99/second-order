@@ -1,0 +1,7 @@
+name: second_order
+version: "0.1.0"
+config-version: 2
+profile: second_order
+
+flags:
+  send_anonymous_usage_stats: false

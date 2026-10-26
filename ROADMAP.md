@@ -238,7 +238,7 @@ Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks 
 | Oct 2026 | Extra manual-stage `gitleaks-history` hook for CI | The standard gitleaks hook scans only staged changes, which are empty in CI; this one scans the full history with the same pinned version |
 | Oct 2026 | `pre-commit` is a required status check in "Protect main" | Without it a red check is only a warning; tied to the GitHub Actions app so nothing else can report a pass. "Branch must be up to date" left off (solo project) |
 | Oct 2026 | Stay on BigQuery sandbox; tables expire after 60 days | Free with no billing; the pipeline rebuilds everything with one command, so rebuild before any demo |
-| Oct 2026 | `.env` loaded with `uv run --env-file`, no python-dotenv | uv already reads env files; one less library to pin and audit |
+| Oct 2026 | `.env` loaded with `uv run --env-file`, no python-dotenv | uv already reads env files; one less library to pin and audit (dbt-core 1.12 installs python-dotenv as a dependency since M3-01; our code still doesn't use it) |
 | Oct 2026 | Dataset delete refuses if any tables exist and asks for confirmation | Protects loaded data; BigQuery also enforces it (`delete_contents=False`) |
 | Oct 2026 | Raw tables load every column as STRING | Keeps data exactly as delivered (e.g. leading zeros in zip codes); types are fixed in dbt staging |
 | Oct 2026 | Loader replaces each raw table on every run (`WRITE_TRUNCATE`) | Running it twice gives the same table instead of duplicate rows |
@@ -247,6 +247,9 @@ Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks 
 | Oct 2026 | dbt builds into its own datasets, separate from raw | "Drop all dbt tables" can never touch the loaded data |
 | Oct 2026 | No dbt packages; views and tables only | Built-in tests are enough; sandbox doesn't allow MERGE, so no incremental models |
 | Oct 2026 | CI runs `dbt parse`, not `compile` | `parse` needs no warehouse connection, keeping CI credential-free |
+| Oct 2026 | dbt models build into dataset `ecommerce_dbt` (US) | Same location as the raw dataset so joins work; dropping it can't touch raw data |
+| Oct 2026 | Sandbox storage is a 10 GiB lifetime budget | Deleted data isn't refunded, so staging models will be views, Reverse steps rebuild only what an issue touched, and raw data is reloaded only when needed |
+| Oct 2026 | profiles.yml outside the repo, profiles.example.yml committed | No connection details in git, but a fresh clone can still be set up |
 
 ## 13. Later (not in current scope)
 
