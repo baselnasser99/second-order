@@ -129,9 +129,12 @@ data/
 *_key.json
 service-account*.json
 credentials*.json
+client_secret*.json
 application_default_credentials.json
 *.pem
 *.p12
+*.key
+id_rsa*
 
 # dbt build output
 dbt_packages/
