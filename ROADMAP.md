@@ -164,6 +164,8 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 | Oct 2026 | Python pinned to 3.13 (`requires-python = "==3.13.*"`) | Newest version supported by dbt-core, dbt-bigquery and google-cloud-bigquery; pinned in `pyproject.toml` because `.gitignore` ignores `.python-version` |
 | Oct 2026 | Dependabot security updates stay off until M1-05 | M1-04 adds no libraries; turn on when the first one arrives |
 | Oct 2026 | No service account key files | Log in with gcloud application-default login instead; nothing to leak from the repo |
+| Oct 2026 | Dependabot security updates on | First libraries (pre-commit, ruff) arrived in M1-05; Dependabot only opens PRs for known vulnerabilities, and they still go through protected `main` |
+| Oct 2026 | pre-commit hooks pinned to commit SHAs, not tags | A tag can be moved to point at different code; a SHA cannot. Release version kept in a comment for readability |
 
 ## 11. Later (not in current scope)
 
