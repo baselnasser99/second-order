@@ -160,4 +160,4 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 
 - Cloud Storage raw bucket (needs billing + budget alert; free only in us-east1/us-west1/us-central1)
 - Scheduled pipeline runs
-- Azure exposure if Vancouver co-op postings call for it
+- Azure exposure
