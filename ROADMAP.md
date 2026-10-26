@@ -163,6 +163,7 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 | Oct 2026 | Project board is public | Lets reviewers and recruiters see how the work is tracked; it holds only issue titles and statuses |
 | Oct 2026 | Python pinned to 3.13 (`requires-python = "==3.13.*"`) | Newest version supported by dbt-core, dbt-bigquery and google-cloud-bigquery; pinned in `pyproject.toml` because `.gitignore` ignores `.python-version` |
 | Oct 2026 | Dependabot security updates stay off until M1-05 | M1-04 adds no libraries; turn on when the first one arrives |
+| Oct 2026 | No service account key files | Log in with gcloud application-default login instead; nothing to leak from the repo |
 
 ## 11. Later (not in current scope)
 
