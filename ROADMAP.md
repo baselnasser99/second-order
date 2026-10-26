@@ -166,6 +166,9 @@ Test: dataset appears in BigQuery. Reverse: delete it, recreate it, confirm it's
 | Oct 2026 | No service account key files | Log in with gcloud application-default login instead; nothing to leak from the repo |
 | Oct 2026 | Dependabot security updates on | First libraries (pre-commit, ruff) arrived in M1-05; Dependabot only opens PRs for known vulnerabilities, and they still go through protected `main` |
 | Oct 2026 | pre-commit hooks pinned to commit SHAs, not tags | A tag can be moved to point at different code; a SHA cannot. Release version kept in a comment for readability |
+| Oct 2026 | GitHub Actions runs pre-commit itself, actions pinned to commit SHAs | One config for local and CI checks, so they can't disagree; SHAs for the same reason as the hooks |
+| Oct 2026 | Extra manual-stage `gitleaks-history` hook for CI | The standard gitleaks hook scans only staged changes, which are empty in CI; this one scans the full history with the same pinned version |
+| Oct 2026 | `pre-commit` is a required status check in "Protect main" | Without it a red check is only a warning; tied to the GitHub Actions app so nothing else can report a pass. "Branch must be up to date" left off (solo project) |
 
 ## 11. Later (not in current scope)
 
