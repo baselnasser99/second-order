@@ -115,6 +115,7 @@ Thumbs.db
 
 # Environment files (keep the example template)
 .env.*
+*.env
 !.env.example
 
 # Local data files (Olist CSVs are downloaded, never committed)
@@ -129,6 +130,8 @@ data/
 service-account*.json
 credentials*.json
 application_default_credentials.json
+*.pem
+*.p12
 
 # dbt build output
 dbt_packages/
