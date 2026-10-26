@@ -16,9 +16,17 @@ from google.cloud import bigquery
 DATASET_NAME = "ecommerce_analytics"
 RAW_DIR = Path("data/raw")
 
-# Table name -> CSV file. Add the other Olist files here in M2-04.
+# BigQuery table name -> CSV file in data/raw/. Every file here is loaded on each run.
 FILES = {
+    "raw_customers": "olist_customers_dataset.csv",
+    "raw_geolocation": "olist_geolocation_dataset.csv",
+    "raw_order_items": "olist_order_items_dataset.csv",
+    "raw_order_payments": "olist_order_payments_dataset.csv",
+    "raw_order_reviews": "olist_order_reviews_dataset.csv",
     "raw_orders": "olist_orders_dataset.csv",
+    "raw_products": "olist_products_dataset.csv",
+    "raw_sellers": "olist_sellers_dataset.csv",
+    "raw_product_category_translation": "product_category_name_translation.csv",
 }
 
 
