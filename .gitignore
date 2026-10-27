@@ -140,6 +140,7 @@ id_rsa*
 target/
 dbt_packages/
 logs/
-# Real dbt profile lives in ~/.dbt/; only profiles.example.yml is committed
+# Real dbt profile lives in ~/.dbt/; only profiles.example.yml and the placeholder CI profile are committed
 profiles.yml
+!dbt/ci/profiles.yml
 .user.yml
