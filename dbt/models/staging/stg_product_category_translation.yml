@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: stg_product_category_translation
+    columns:
+      - name: product_category_name
+        data_tests:
+          - unique
+          - not_null
