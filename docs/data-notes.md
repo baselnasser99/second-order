@@ -204,4 +204,4 @@ FROM (
 | `review_id` repeats across orders, but the pair `review_id` + `order_id` never repeats | Don't test `review_id` as unique. Test the pair `review_id` + `order_id` as unique instead |
 | Geolocation has many rows per zip prefix and 261,831 exact copies | Reduce to one row per zip prefix (average lat/lng) before joining it to anything |
 | One person can have many `customer_id`s | Join orders to customers by `customer_id`, but count people and repeat buyers by `customer_unique_id` |
-| 2 categories have no English name; 610 products have no category | Use the English name when there is one, otherwise keep the Portuguese name. Proposed for M3-07, not a finding: NULL categories become `'unknown'` in the marts |
+| 2 categories have no English name; 610 products have no category | In `fct_order_items.product_category` (M3-07): the English name when there is one, otherwise the Portuguese name, otherwise `'unknown'`. Of 112,650 items, 1,603 are `'unknown'`, 15 are `portateis_cozinha_e_preparadores_de_alimentos` and 9 are `pc_gamer` |

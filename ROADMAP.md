@@ -258,6 +258,8 @@ Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks 
 | Oct 2026 | `fct_orders.review_score` is the order's most recent review (by `review_creation_date`, `review_id` as tie-break) | 547 orders have more than one review; keeping one per order stops row duplication, and the tie-break keeps the result the same between runs |
 | Oct 2026 | `delivery_days` = calendar days from purchase to delivery to the customer; `is_late` = delivered date after the estimated date; both NULL with no delivery date | NULL means "not delivered yet". 8 orders are marked `delivered` but have no delivery date, so they get NULL too |
 | Oct 2026 | Reverse steps drop one dbt table with `scripts/drop_table.py` | Works only in `ecommerce_dbt`, refuses views and names with dots, and asks for the table name before deleting, so it can't touch raw data or staging |
+| Oct 2026 | `fct_order_items.product_category` = English name, else Portuguese name, else `'unknown'` | 2 categories (13 products) have no translation and 610 products have no category (docs/data-notes.md question 7); every item keeps a category, so none drop out of per-category totals |
+| Oct 2026 | `fct_order_items` repeats the order-level `is_late` and `review_score` on every item | Lets item and seller analysis filter by them; averaging them per item weights multi-item orders more, so M4 averages them per order |
 
 ## 13. Later (not in current scope)
 
