@@ -251,6 +251,8 @@ Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks 
 | Oct 2026 | Sandbox storage is a 10 GiB lifetime budget | Deleted data isn't refunded, so staging models will be views, Reverse steps rebuild only what an issue touched, and raw data is reloaded only when needed |
 | Oct 2026 | profiles.yml outside the repo, profiles.example.yml committed | No connection details in git, but a fresh clone can still be set up |
 | Oct 2026 | Staging views and mart tables both build into `ecommerce_dbt`; no custom schema per folder | One dbt dataset to drop and rebuild in Reverse steps; a `+schema` setting would add a second dataset (`ecommerce_dbt_staging`) for no gain at this size |
+| Oct 2026 | `dim_customers` counts orders of every status in `number_of_orders` | Keeps the mart a plain record of what people ordered; the dashboard can filter by status later |
+| Oct 2026 | `dim_customers.customer_state` is the state on the person's most recent order | A person can order from more than one state; the latest one is where they are now. Ties on purchase time are broken by `order_id` so the result never changes between runs |
 
 ## 13. Later (not in current scope)
 
