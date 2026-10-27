@@ -7,11 +7,10 @@ Usage:
 """
 
 import csv
-import os
-import sys
 from pathlib import Path
 
 from google.cloud import bigquery
+from project_id import get_project_id
 
 DATASET_NAME = "ecommerce_analytics"
 RAW_DIR = Path("data/raw")
@@ -49,10 +48,7 @@ def load_csv(client: bigquery.Client, csv_path: Path, table_id: str) -> None:
 
 
 def main() -> None:
-    project_id = os.environ.get("GCP_PROJECT_ID")
-    if not project_id:
-        sys.exit("GCP_PROJECT_ID is not set. Copy .env.example to .env and fill it in.")
-
+    project_id = get_project_id()
     client = bigquery.Client(project=project_id)
     for table_name, file_name in FILES.items():
         load_csv(

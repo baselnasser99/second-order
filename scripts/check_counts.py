@@ -7,13 +7,13 @@ Usage:
 """
 
 import csv
-import os
 import sys
 from pathlib import Path
 
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 from load import DATASET_NAME, FILES, RAW_DIR
+from project_id import get_project_id
 
 
 def count_csv_rows(csv_path: Path) -> int:
@@ -23,10 +23,7 @@ def count_csv_rows(csv_path: Path) -> int:
 
 
 def main() -> None:
-    project_id = os.environ.get("GCP_PROJECT_ID")
-    if not project_id:
-        sys.exit("GCP_PROJECT_ID is not set. Copy .env.example to .env and fill it in.")
-
+    project_id = get_project_id()
     client = bigquery.Client(project=project_id)
     failed = False
     print(f"{'Table':<34}{'CSV':>10}{'BigQuery':>10}  Result")

@@ -8,25 +8,16 @@ Usage:
 """
 
 import argparse
-import os
-import re
 import sys
 
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
+from project_id import get_project_id
 
 # Fixed name with no argument to change it: this script can never touch ecommerce_analytics.
 DATASET_NAME = "ecommerce_dbt"
 # Every dbt model starts with one of these; raw tables start with raw_.
 DBT_PREFIXES = ("stg_", "dim_", "fct_")
-# Google's project ID rules: 6-30 characters, lowercase letters, digits and hyphens,
-# starts with a letter, doesn't end with a hyphen.
-PROJECT_ID_PATTERN = re.compile(r"[a-z][a-z0-9-]{4,28}[a-z0-9]")
-
-
-def is_valid_project_id(project_id: str) -> bool:
-    """The library puts the ID into the request address unescaped, so / or ? could redirect it."""
-    return PROJECT_ID_PATTERN.fullmatch(project_id) is not None
 
 
 def non_dbt_names(names: list[str]) -> list[str]:
@@ -44,10 +35,6 @@ def self_check() -> None:
         "STG_orders",
         "stgorders",
     ]
-    assert is_valid_project_id("second-order-olist")
-    assert not is_valid_project_id("myproj/datasets/ecommerce_analytics")
-    assert not is_valid_project_id("myproj?x=")
-    assert not is_valid_project_id("abc")
     print("Self-check passed.")
 
 
@@ -63,14 +50,7 @@ def main() -> None:
         self_check()
         return
 
-    project_id = os.environ.get("GCP_PROJECT_ID")
-    if not project_id:
-        sys.exit("GCP_PROJECT_ID is not set. Copy .env.example to .env and fill it in.")
-    if not is_valid_project_id(project_id):
-        sys.exit(
-            f"Refusing: '{project_id}' is not a valid Google Cloud project ID. Nothing was deleted."
-        )
-
+    project_id = get_project_id()
     client = bigquery.Client(project=project_id)
     dataset_id = f"{project_id}.{DATASET_NAME}"
     try:

@@ -6,11 +6,11 @@ Usage:
 """
 
 import argparse
-import os
 import sys
 
 from google.api_core.exceptions import Conflict, NotFound
 from google.cloud import bigquery
+from project_id import get_project_id
 
 DATASET_NAME = "ecommerce_analytics"
 LOCATION = "US"
@@ -48,10 +48,7 @@ def main() -> None:
     parser.add_argument("command", choices=["create", "delete"])
     args = parser.parse_args()
 
-    project_id = os.environ.get("GCP_PROJECT_ID")
-    if not project_id:
-        sys.exit("GCP_PROJECT_ID is not set. Copy .env.example to .env and fill it in.")
-
+    project_id = get_project_id()
     client = bigquery.Client(project=project_id)
     dataset_id = f"{project_id}.{DATASET_NAME}"
     if args.command == "create":
