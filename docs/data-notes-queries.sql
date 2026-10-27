@@ -328,3 +328,24 @@ WHERE p.product_category_name IS NOT NULL
   AND tr.product_category_name IS NULL
 GROUP BY p.product_category_name
 ORDER BY products DESC;
+
+-- 8.1 · midnight check: raw_order_reviews
+SELECT
+  COUNTIF(SUBSTR(review_creation_date, 12) != '00:00:00') AS review_creation_date__not_midnight
+FROM `ecommerce_analytics.raw_order_reviews`;
+
+-- 8.2 · midnight check: raw_orders
+SELECT
+  COUNTIF(SUBSTR(order_estimated_delivery_date, 12) != '00:00:00') AS order_estimated_delivery_date__not_midnight
+FROM `ecommerce_analytics.raw_orders`;
+
+-- 9 · duplicate (review_id, order_id) pairs
+SELECT
+  COUNT(*) AS pairs_seen_more_than_once,
+  SUM(n) - COUNT(*) AS extra_rows
+FROM (
+  SELECT review_id, order_id, COUNT(*) AS n
+  FROM `ecommerce_analytics.raw_order_reviews`
+  GROUP BY review_id, order_id
+  HAVING COUNT(*) > 1
+);

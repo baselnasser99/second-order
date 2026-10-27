@@ -2,7 +2,7 @@
 
 What the 9 raw tables in `ecommerce_analytics` actually contain, checked before writing any dbt staging model. Every column was loaded as STRING (text), so these checks look at the text as delivered.
 
-The exact text of all 24 queries is in [data-notes-queries.sql](data-notes-queries.sql), numbered to match the questions below. All are read-only `SELECT`s. Results are from the data loaded on Oct 26, 2026.
+The exact text of all 27 queries is in [data-notes-queries.sql](data-notes-queries.sql), numbered to match the questions below. All are read-only `SELECT`s. Results are from the data loaded on Oct 26, 2026.
 
 ## 1. Are blanks NULL, empty text, or spaces?
 
@@ -52,7 +52,7 @@ Queries 2.2 and 2.3 repeat the same two lines for each date column of `raw_order
 | raw_orders | order_delivered_customer_date | 2016-11-08 10:58:34 · 2016-10-14 15:07:11 · 2016-10-16 14:36:59 |
 | raw_orders | order_estimated_delivery_date | 2017-03-01 00:00:00 · 2017-05-22 00:00:00 · 2016-09-30 00:00:00 |
 
-The samples for `review_creation_date` and `order_estimated_delivery_date` are all at midnight. They look like plain dates stored with a time, but only the samples were checked for this.
+The samples for `review_creation_date` and `order_estimated_delivery_date` are all at midnight. Question 8 checks every value.
 
 ## 3. Do number columns parse, and are review scores and zip codes valid?
 
@@ -155,17 +155,53 @@ ORDER BY products DESC
 
 **Answer:** 2 categories, 13 products: `portateis_cozinha_e_preparadores_de_alimentos` (10 products) and `pc_gamer` (3). Another 610 products have no category at all (see question 1).
 
+## 8. Are the two date-only columns always at midnight?
+
+Queries 8.1 and 8.2. Characters 12 onward are the time part (question 2 proved the format), and neither column has NULLs (question 1).
+
+```sql
+SELECT
+  COUNTIF(SUBSTR(review_creation_date, 12) != '00:00:00') AS review_creation_date__not_midnight
+FROM `ecommerce_analytics.raw_order_reviews`
+```
+
+```sql
+SELECT
+  COUNTIF(SUBSTR(order_estimated_delivery_date, 12) != '00:00:00') AS order_estimated_delivery_date__not_midnight
+FROM `ecommerce_analytics.raw_orders`
+```
+
+**Answer:** `order_estimated_delivery_date` is always at midnight (**0** values with a time), so it's a plain date. `review_creation_date` has **85** values with a real time, so it isn't.
+
+## 9. Is the pair `review_id` + `order_id` unique?
+
+Query 9:
+
+```sql
+SELECT
+  COUNT(*) AS pairs_seen_more_than_once,
+  SUM(n) - COUNT(*) AS extra_rows
+FROM (
+  SELECT review_id, order_id, COUNT(*) AS n
+  FROM `ecommerce_analytics.raw_order_reviews`
+  GROUP BY review_id, order_id
+  HAVING COUNT(*) > 1
+)
+```
+
+**Answer:** yes. **0** pairs appear more than once. (`extra_rows` comes back NULL because there are no rows to add up.) Every row in reviews is one review on one order.
+
 ## What this means for staging
 
 | Finding | Rule in staging |
 |---|---|
 | Blanks are already NULL, except whitespace-only review comments | Wrap every text column in `NULLIF(TRIM(col), '')`. This trims spaces and turns any empty or whitespace-only value into NULL, so the rule still holds if a reload brings in `''` |
-| All dates are `YYYY-MM-DD HH:MM:SS` | Cast with `SAFE_CAST(col AS TIMESTAMP)`. `review_creation_date` and `order_estimated_delivery_date` look like plain dates, so cast them to `DATE` |
+| All dates are `YYYY-MM-DD HH:MM:SS`, in Brazil local time with no timezone | Cast with `CAST(col AS DATETIME)`, not `TIMESTAMP`, which would label them as UTC. `order_estimated_delivery_date` is always midnight, so cast it to `DATE`. `review_creation_date` has 85 values with a time, so it stays `DATETIME` |
 | Missing delivery and approval dates (orders not yet approved, shipped or delivered) | Keep them as NULL. Don't fill them in; NULL means "hasn't happened" |
-| All number columns parse | Cast with `SAFE_CAST`: `NUMERIC` for money (`price`, `freight_value`, `payment_value`), `INT64` for counts, IDs and sizes, `FLOAT64` for lat/lng. Fix the source's misspellings `lenght` → `length` when renaming |
+| All number columns parse | Cast with plain `CAST`, so a future value that doesn't convert fails the build instead of becoming NULL: `NUMERIC` for money (`price`, `freight_value`, `payment_value`), `INT64` for counts, IDs and sizes, `FLOAT64` for lat/lng. Fix the source's misspellings `lenght` → `length` when renaming |
 | Review scores are all 1–5 | Cast to `INT64` and add a dbt test that scores stay between 1 and 5 |
 | Zip prefixes are all 5 characters | Keep them as STRING. Casting to a number would drop leading zeros |
-| `review_id` repeats across orders | Don't test `review_id` as unique. Test the pair `review_id` + `order_id` as unique instead (not yet checked against the data) |
+| `review_id` repeats across orders, but the pair `review_id` + `order_id` never repeats | Don't test `review_id` as unique. Test the pair `review_id` + `order_id` as unique instead |
 | Geolocation has many rows per zip prefix and 261,831 exact copies | Reduce to one row per zip prefix (average lat/lng) before joining it to anything |
 | One person can have many `customer_id`s | Join orders to customers by `customer_id`, but count people and repeat buyers by `customer_unique_id` |
-| 2 categories have no English name; 610 products have no category | Use the English name when there is one, otherwise keep the Portuguese name; NULL categories become `'unknown'` in the marts |
+| 2 categories have no English name; 610 products have no category | Use the English name when there is one, otherwise keep the Portuguese name. Proposed for M3-07, not a finding: NULL categories become `'unknown'` in the marts |
