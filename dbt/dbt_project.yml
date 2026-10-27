@@ -6,6 +6,10 @@ profile: second_order
 flags:
   send_anonymous_usage_stats: false
 
+vars:
+  # Last day with normal order volume; later days tail off (ROADMAP.md decision log, M4-01).
+  end_of_data: "2018-08-21"
+
 # Staging as views (no storage used, 10 GiB sandbox budget); marts as tables.
 # Mart descriptions are copied into BigQuery so they show in the console and Looker Studio.
 models:
