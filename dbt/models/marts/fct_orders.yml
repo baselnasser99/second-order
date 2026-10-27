@@ -2,12 +2,39 @@ version: 2
 
 models:
   - name: fct_orders
+    description: One row per order, with its value, payment, delivery and review. Every order in stg_orders appears exactly once.
     columns:
       - name: order_id
+        description: The order's ID.
         data_tests:
           - unique
           - not_null
+      - name: customer_id
+        description: The per-order customer ID. Use customer_unique_id to group orders by person.
+      - name: customer_unique_id
+        description: The person who placed the order. Joins to dim_customers.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_unique_id
+      - name: order_status
+        description: Olist order status, such as delivered, shipped or canceled.
+      - name: order_purchase_timestamp
+        description: When the order was placed.
+      - name: items_value
+        description: Sum of item prices in Brazilian reais (BRL), freight not included. NULL when the order has no items.
+      - name: freight_value
+        description: Sum of freight charges in BRL. NULL when the order has no items.
+      - name: payment_total
+        description: Sum of all payments in BRL. NULL when the order has no payments. Can differ from items_value plus freight_value (vouchers, installment fees).
+      - name: delivery_days
+        description: Calendar days from purchase to delivery to the customer. NULL when there is no delivery date (usually not delivered yet; 8 delivered orders also lack one).
+      - name: is_late
+        description: True when delivered after the estimated delivery date. NULL when there is no delivery date (usually not delivered yet; 8 delivered orders also lack one).
       - name: review_score
+        description: Score from 1 to 5 on the order's most recent review (review_id breaks ties). NULL when the order has no review.
         data_tests:
           - accepted_values:
               arguments:

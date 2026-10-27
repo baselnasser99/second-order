@@ -2,12 +2,14 @@ version: 2
 
 models:
   - name: fct_order_items
+    description: One row per item in an order, with product category and seller, for finding which products and sellers cost money. Every item in stg_order_items appears exactly once.
     data_tests:
       # one row per item number within an order
       - unique:
           column_name: "order_id || '-' || cast(order_item_id as string)"
     columns:
       - name: order_id
+        description: The order this item belongs to. Joins to fct_orders.
         data_tests:
           - not_null
           - relationships:
@@ -15,14 +17,32 @@ models:
                 to: ref('fct_orders')
                 field: order_id
       - name: order_item_id
+        description: Item number within the order, starting at 1.
         data_tests:
           - not_null
       - name: product_id
-        data_tests:
-          - not_null
-      - name: seller_id
+        description: The product's ID.
         data_tests:
           - not_null
       - name: product_category
+        description: Category in English, else the Portuguese name when there is no translation, else the text unknown when the product has no category.
         data_tests:
           - not_null
+      - name: seller_id
+        description: The seller's ID.
+        data_tests:
+          - not_null
+      - name: seller_state
+        description: Two-letter Brazilian state of the seller.
+      - name: price
+        description: Item price in Brazilian reais (BRL), freight not included.
+      - name: freight_value
+        description: Freight charge for this item in BRL.
+      - name: order_status
+        description: Status of the whole order, copied from fct_orders.
+      - name: order_purchase_timestamp
+        description: When the order was placed, copied from fct_orders.
+      - name: is_late
+        description: Order-level late flag, copied from fct_orders and repeated on every item. Average it per order, not per item.
+      - name: review_score
+        description: Order-level review score, copied from fct_orders and repeated on every item. Average it per order, not per item.

@@ -211,6 +211,10 @@ Test: `dbt build` from empty datasets passes in one command. Reverse: drop all d
 Add `dbt parse` to CI with a dummy profile and no cloud credentials. `parse` checks the project without connecting to BigQuery; `compile` would need a connection, so it's left out.
 Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks go red; close it.
 
+**M3-10 · Validate the project ID in every script**
+`drop_table.py`, `dataset.py`, `load.py` and `check_counts.py` build BigQuery IDs from `GCP_PROJECT_ID` without checking it. The Google library puts the ID into the request address unescaped, so a malformed value containing `/` or `?` could point a delete or a table replace at another dataset or table (found in the M3-08 security review). Move the check from `drop_dbt_dataset.py` into one shared file in `scripts/` that every script imports, and switch `drop_dbt_dataset.py` to it. Every script refuses a project ID that breaks Google's rules (6 to 30 characters, lowercase letters, digits and hyphens, starts with a letter, doesn't end with a hyphen) before the BigQuery client is created. The shared file has a self-check with cases for a valid ID, a slash, a question mark and a too-short ID.
+Test: every script runs normally with the real project ID; each refuses `myproj/datasets/ecommerce_analytics?x=` with exit code 1 before connecting. Reverse: on a throwaway branch, loosen the pattern to allow `/`; the self-check fails. Delete the branch.
+
 ---
 
 ## 12. Decision log
@@ -260,6 +264,9 @@ Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks 
 | Oct 2026 | Reverse steps drop one dbt table with `scripts/drop_table.py` | Works only in `ecommerce_dbt`, refuses views and names with dots, and asks for the table name before deleting, so it can't touch raw data or staging |
 | Oct 2026 | `fct_order_items.product_category` = English name, else Portuguese name, else `'unknown'` | 2 categories (13 products) have no translation and 610 products have no category (docs/data-notes.md question 7); every item keeps a category, so none drop out of per-category totals |
 | Oct 2026 | `fct_order_items` repeats the order-level `is_late` and `review_score` on every item | Lets item and seller analysis filter by them; averaging them per item weights multi-item orders more, so M4 averages them per order |
+| Oct 2026 | Mart descriptions copied into BigQuery with `persist_docs`, for marts only | Descriptions show in the BigQuery console and Looker Studio's field list; it writes only table metadata, so it uses no storage. Staging views have no descriptions and Looker Studio reads only marts |
+| Oct 2026 | Full rebuilds delete the whole `ecommerce_dbt` dataset with `scripts/drop_dbt_dataset.py` | `drop_table.py` refuses views and `dataset.py` handles only the raw dataset. The dataset name is fixed in the code; the script refuses a project ID that breaks Google's rules (so a `/` or `?` can't redirect the request to another dataset), refuses if any object isn't named `stg_`, `dim_` or `fct_` (raw tables are `raw_`), and deletes only when the dataset name is typed; a wrong name, no input or Ctrl+C cancels with exit code 1 |
+| Oct 2026 | M3-08's Test and Reverse done as one drop-and-rebuild | Both are the same action (build from an empty dataset), and every build rewrites the mart tables while deleted storage isn't refunded. Raw row counts checked before and after show the raw data was untouched |
 
 ## 13. Later (not in current scope)
 
