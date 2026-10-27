@@ -2,17 +2,26 @@ version: 2
 
 models:
   - name: dim_customers
+    description: One row per real person (customer_unique_id), with their order history. Orders of every status count.
     columns:
       - name: customer_unique_id
+        description: The person's ID. Olist makes a new customer_id for every order, so this is the ID that groups one person's orders.
         data_tests:
           - unique
           - not_null
+      - name: customer_state
+        description: Two-letter Brazilian state on the person's most recent order (order_id breaks ties).
       - name: first_order_at
+        description: Purchase time of the person's first order.
         data_tests:
           - not_null
+      - name: last_order_at
+        description: Purchase time of the person's most recent order. Equals first_order_at for one-time customers.
       - name: number_of_orders
+        description: How many orders the person placed, of any status.
         data_tests:
           - not_null
       - name: is_repeat_customer
+        description: True when the person placed more than one order.
         data_tests:
           - not_null

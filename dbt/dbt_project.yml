@@ -7,9 +7,13 @@ flags:
   send_anonymous_usage_stats: false
 
 # Staging as views (no storage used, 10 GiB sandbox budget); marts as tables.
+# Mart descriptions are copied into BigQuery so they show in the console and Looker Studio.
 models:
   second_order:
     staging:
       +materialized: view
     marts:
       +materialized: table
+      +persist_docs:
+        relation: true
+        columns: true
