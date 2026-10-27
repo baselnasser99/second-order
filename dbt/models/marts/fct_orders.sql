@@ -40,7 +40,7 @@ select
     date_diff(date(o.order_delivered_customer_date), date(o.order_purchase_timestamp), day) as delivery_days,
     date(o.order_delivered_customer_date) > o.order_estimated_delivery_date as is_late,
     r.review_score
-from {{ ref('stg_orders') }} as o
+from {{ ref('stg_orderz') }} as o
 left join {{ ref('stg_customers') }} as c
     on o.customer_id = c.customer_id
 left join items as i
