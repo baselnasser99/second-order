@@ -253,6 +253,11 @@ Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks 
 | Oct 2026 | Staging views and mart tables both build into `ecommerce_dbt`; no custom schema per folder | One dbt dataset to drop and rebuild in Reverse steps; a `+schema` setting would add a second dataset (`ecommerce_dbt_staging`) for no gain at this size |
 | Oct 2026 | `dim_customers` counts orders of every status in `number_of_orders` | Keeps the mart a plain record of what people ordered; the dashboard can filter by status later |
 | Oct 2026 | `dim_customers.customer_state` is the state on the person's most recent order | A person can order from more than one state; the latest one is where they are now. Ties on purchase time are broken by `order_id` so the result never changes between runs |
+| Oct 2026 | `fct_orders` keeps `items_value`, `freight_value` and `payment_total` as separate columns | They don't always add up (vouchers, installment fees), so combining them would hide real differences |
+| Oct 2026 | `fct_orders` orders with no items or no payments get NULL, not 0 | A 0 would drag averages down; NULL means "no data" and is left out of averages |
+| Oct 2026 | `fct_orders.review_score` is the order's most recent review (by `review_creation_date`, `review_id` as tie-break) | 547 orders have more than one review; keeping one per order stops row duplication, and the tie-break keeps the result the same between runs |
+| Oct 2026 | `delivery_days` = calendar days from purchase to delivery to the customer; `is_late` = delivered date after the estimated date; both NULL with no delivery date | NULL means "not delivered yet". 8 orders are marked `delivered` but have no delivery date, so they get NULL too |
+| Oct 2026 | Reverse steps drop one dbt table with `scripts/drop_table.py` | Works only in `ecommerce_dbt`, refuses views and names with dots, and asks for the table name before deleting, so it can't touch raw data or staging |
 
 ## 13. Later (not in current scope)
 
