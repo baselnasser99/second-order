@@ -53,7 +53,7 @@ Around everything: GitHub repo · GitHub Actions checks · GitHub Projects board
 
 - One issue at a time, each on its own branch, merged into `main` through a reviewed pull request.
 - Every issue follows the loop in Section 6 and passes the security checklist in Section 7.
-- Decisions are recorded in Section 12 when they're made, not afterwards.
+- Decisions are recorded in Section 13 when they're made, not afterwards.
 - The owner handles all logins and credentials personally and reviews every change before merging.
 
 ## 6. The working loop: Build → Test → Reverse → Refactor
@@ -91,12 +91,14 @@ Test: row counts in BigQuery match the CSVs. Reverse: drop all raw tables, reloa
 **Goal:** dbt staging and mart models with passing data tests.
 Test: `dbt build` passes (unique IDs, no empty keys, every order links to a customer). Reverse: drop all dbt tables, rebuild from nothing. Add dbt parse check to GitHub Actions (still no credentials).
 
-### Milestone 4 — Analytics & Dashboard (≈ 15 hours · target: late February 2027)
+### Milestone 4 — Analytics & Dashboard (≈ 15 hours · target: mid-December 2026)
 **Goal:** business metrics answering the question, shown in Looker Studio.
+Closes with M4-07, the rebuild before the sandbox expiry around December 20.
 Test: hand-check 2–3 numbers against raw data. Reverse: rebuild dashboard using only mart tables. Every chart has a one-sentence caption.
 
-### Milestone 5 — Insights & Delivery (≈ 10 hours · target: March 2027)
+### Milestone 5 — Insights & Delivery (≈ 10 hours · target: late December 2026)
 **Goal:** memo, README (finding first, setup last), architecture diagram, 2-minute demo video.
+The demo video is recorded after M4-07, so the tables are freshly rebuilt.
 Test: a non-technical friend reads the README and explains the finding back. Reverse: follow your own README on a fresh clone and rebuild everything.
 
 ---
@@ -217,7 +219,41 @@ Test: every script runs normally with the real project ID; each refuses `myproj/
 
 ---
 
-## 12. Decision log
+## 12. Milestone 4 issues (copy each into GitHub Issues)
+
+Each issue uses the same checklist as Section 9.
+
+**M4-01 · First-order columns in `dim_customers`**
+Add `first_order_id`, `first_order_is_late` and `first_order_review_score` (from `fct_orders`), plus `has_full_followup` and `returned_within_180_days`. `has_full_followup`: true when the first order was placed at least 180 days before the end of the data, so everyone compared had the same chance to come back. `returned_within_180_days`: true when the person placed another order that isn't canceled or unavailable, on a later calendar day and at most 180 calendar days after the first order's date; NULL without full follow-up. A same-day order isn't a return (897 of the 2,997 repeat customers placed their second order on the same day as their first). `is_repeat_customer` stays as it is. The first order is the earliest by purchase time, any status, with `order_id` as tie-break (the same rule as `customer_state`). Check the last months of purchases first: if the data tails off, choose the end date deliberately and record it in the decision log. Tests: `first_order_id` not null and related to `fct_orders`; `returned_within_180_days` not null when `has_full_followup` is true, and NULL when `has_full_followup` is false. Descriptions for the new columns.
+Test: `dbt build --select dim_customers` passes; hand-check 3 people (a repeat customer whose only other order was on the same day, one with a late first order, one without full follow-up) with direct SQL; report how many people have full follow-up and their 180-day return rate. Reverse: drop `dim_customers` with `scripts/drop_table.py`, rebuild, same counts.
+
+**M4-02 · Metric definitions**
+`docs/metrics.md`: each dashboard number in plain words, the mart and columns it uses, and its SQL. Covers people, repeat customers and repeat rate (all people), 180-day return rate (full follow-up only), late-order rate, average review per order, order value and payment totals, and the value of canceled and unavailable orders. Rates count orders or people, never items.
+Test: hand-check 3 numbers against the raw tables with direct SQL (repeat customers 2,997, late orders 6,535, payment total 16,008,872.12); each matches. Reverse: n/a.
+
+**M4-03 · Connect Looker Studio to the marts**
+Done by hand in the browser. A new report with BigQuery data sources for `dim_customers`, `fct_orders` and `fct_order_items` only; nothing reads raw or staging. Decide the data credentials (owner's or viewer's) and who can open the report; it stays private until M5. Record both in the decision log.
+Test: each data source's field list shows the mart descriptions; a test table shows 96,096 people. Reverse: remove one data source, add it again, and the test table works again.
+
+**M4-04 · Dashboard page 1: customers**
+Scorecards for people, repeat customers and repeat rate. Charts: 180-day return rate for people whose first order was late vs on time, and by first-order review score (1–5), using full-follow-up people only, with the group size shown next to each rate. Definitions from `docs/metrics.md`.
+Test: hand-check 2 chart numbers with direct SQL on the marts. Reverse: n/a (the rebuild check is in M4-06).
+
+**M4-05 · Dashboard page 2: money**
+Which product categories and sellers lose the most: late-order rate, average review per order and order value per category and per seller, plus the value of canceled and unavailable orders. Rates count each order once, even when it has several items; if Looker Studio can't do that correctly from `fct_order_items`, add a small summary model instead, named `fct_…` (`drop_dbt_dataset.py` only accepts `stg_`, `dim_` and `fct_`). Categories and sellers with fewer than 30 orders are left out of rankings, so one seller with 2 bad orders can't top the list.
+Test: hand-check one category's and one seller's numbers with direct SQL. Reverse: if a summary model was added, drop it with `drop_table.py` and rebuild; otherwise n/a.
+
+**M4-06 · Captions and data-source check**
+A one-sentence caption on every chart: what it shows and the main takeaway. Every data source is a mart table.
+Test: every chart has a caption; the report's data source list shows only mart tables. Reverse: make a copy of the report, remove its data sources, add back only the mart tables; every chart still works. Delete the copy.
+
+**M4-07 · Rebuild before the sandbox expiry (around December 20)**
+Raw tables expire around December 25 and dbt tables about a day later. Check each table's expiration date in the BigQuery console first. Then reload raw with `scripts/load.py`, run `dbt build` and run `scripts/check_counts.py`. Check the expiration dates again: if replacing a table's data doesn't reset its expiry, find another way before the old date passes. This is also the first real run of `load.py` with the M3-10 project ID check.
+Test: counts 9/9, `dbt build` passes, the dashboard headline is unchanged, and the new expiry dates are in late February 2027. Reverse: n/a.
+
+---
+
+## 13. Decision log
 
 | Date | Decision | Why |
 |---|---|---|
@@ -271,8 +307,11 @@ Test: every script runs normally with the real project ID; each refuses `myproj/
 | Oct 2026 | `dbt parse` and the two script self-checks run as local pre-commit hooks, inside the existing CI job | One config for local and CI checks; the required `pre-commit` check already covers them, so the "Protect main" ruleset is unchanged |
 | Oct 2026 | Placeholder dbt profile `dbt/ci/profiles.yml` committed, with a `.gitignore` exception for that one path | `dbt parse` needs a profile but never connects; it holds only the made-up project ID `ci-dummy-project`. No source or model reads `GCP_PROJECT_ID`, so CI needs no environment variable, and the real profile keeps `env_var('GCP_PROJECT_ID')` with no default so a missing variable still fails |
 | Oct 2026 | CI Reverse test PRs are made in the GitHub web editor | The local hooks block committing a deliberate break, and hooks are never skipped; web-editor commits don't run local hooks |
+| Oct 2026 | Milestone 4 and 5 targets moved to December 2026 | M3 finished in late October, three months early. Finishing before the MS starts in January 2027, with the M4-07 rebuild before the sandbox tables expire around December 25, leaves slack. GitHub milestone due dates updated to match (December 20 and December 31) |
+| Oct 2026 | End of data is 2018-08-21; full follow-up = first order on or before 2018-02-22 | Daily orders fall from about 277 to 1 between Aug 22 and Aug 31, and Sept–Oct 2018 hold only 20 orders, so a later end date would count people as fully followed up when the data stops recording their orders. 56,007 people have full follow-up |
+| Oct 2026 | `returned_within_180_days` counts only a non-canceled, non-unavailable order on a later calendar day, at most 180 calendar days after the first order's date; people whose first order was canceled or unavailable stay in the comparison | 897 of 2,997 repeat customers' second order was on the same day as their first, and 66 repeat customers' other orders were all canceled or unavailable; neither is a customer coming back. With the 2018-08-21 end date, 1,116 of 56,007 full-follow-up people returned (1.99%). 900 of them had a canceled or unavailable first order (16 returned); they are people Olist lost at the first attempt, so they stay. Leaving them out would change the rate only to 2.00%, and all but 6 have a NULL `first_order_is_late` (no delivery date), so they drop out of the late vs on-time chart on their own |
 
-## 13. Later (not in current scope)
+## 14. Later (not in current scope)
 
 - Cloud Storage raw bucket (needs billing + budget alert; free only in us-east1/us-west1/us-central1)
 - Scheduled pipeline runs

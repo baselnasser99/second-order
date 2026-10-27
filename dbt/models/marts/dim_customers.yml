@@ -25,3 +25,21 @@ models:
         description: True when the person placed more than one order.
         data_tests:
           - not_null
+      - name: first_order_id
+        description: The person's first order, the earliest by purchase time of any status (order_id breaks ties).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+      - name: first_order_is_late
+        description: True when the first order was delivered after its estimated date. NULL when it has no delivery date (for example, canceled).
+      - name: first_order_review_score
+        description: Review score (1-5) of the first order, its most recent review. NULL when it has no review.
+      - name: has_full_followup
+        description: True when the first order was placed at least 180 days before the end of the data, 2018-08-21 (dbt var end_of_data, see decision log), so the person had a full 180 days to come back.
+        data_tests:
+          - not_null
+      - name: returned_within_180_days
+        description: True when the person placed an order that isn't canceled or unavailable on a later calendar day, at most 180 calendar days after the first order's date. A same-day order isn't a return. NULL without full follow-up.
