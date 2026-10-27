@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: stg_orders
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+      - name: order_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                # every status in raw_orders on Oct 27, 2026 (8 values, 99,441 rows)
+                values: [delivered, shipped, canceled, unavailable, invoiced, processing, created, approved]

@@ -5,3 +5,11 @@ profile: second_order
 
 flags:
   send_anonymous_usage_stats: false
+
+# Staging as views (no storage used, 10 GiB sandbox budget); marts as tables.
+models:
+  second_order:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

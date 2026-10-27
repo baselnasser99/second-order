@@ -1,0 +1,16 @@
+version: 2
+
+# The raw tables loaded by scripts/load.py. dbt only reads from this dataset; nothing is built here.
+sources:
+  - name: olist
+    schema: ecommerce_analytics
+    tables:
+      - name: raw_customers
+      - name: raw_geolocation
+      - name: raw_order_items
+      - name: raw_order_payments
+      - name: raw_order_reviews
+      - name: raw_orders
+      - name: raw_products
+      - name: raw_sellers
+      - name: raw_product_category_translation
