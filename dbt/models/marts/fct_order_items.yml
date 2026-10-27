@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: fct_order_items
+    data_tests:
+      # one row per item number within an order
+      - unique:
+          column_name: "order_id || '-' || cast(order_item_id as string)"
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+      - name: order_item_id
+        data_tests:
+          - not_null
+      - name: product_id
+        data_tests:
+          - not_null
+      - name: seller_id
+        data_tests:
+          - not_null
+      - name: product_category
+        data_tests:
+          - not_null
