@@ -36,7 +36,9 @@ def self_check() -> None:
     """Test the ID check only. Makes no BigQuery connection."""
     assert is_valid_project_id("second-order-olist")
     assert not is_valid_project_id("myproj/datasets/ecommerce_analytics")
+    assert not is_valid_project_id("myproj/datasets")
     assert not is_valid_project_id("myproj?x=")
+    assert not is_valid_project_id("myproj?abc")
     assert not is_valid_project_id("abc")
     print("Self-check passed.")
 
