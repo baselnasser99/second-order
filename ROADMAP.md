@@ -207,9 +207,9 @@ Test: row count equals `stg_order_items`. Reverse: drop and rebuild.
 Descriptions for every mart model and column; `dbt docs generate` works locally (output not committed).
 Test: `dbt build` from empty datasets passes in one command. Reverse: drop all dbt datasets, rebuild from the repo.
 
-**M3-09 · dbt check in GitHub Actions**
-Add `dbt parse` to CI with a dummy profile and no cloud credentials. `parse` checks the project without connecting to BigQuery; `compile` would need a connection, so it's left out.
-Test: open a PR; checks go green. Reverse: break a `ref()` in a test PR; checks go red; close it.
+**M3-09 · dbt and script checks in GitHub Actions**
+Add three pre-commit hooks, which the existing CI job runs: `dbt parse` with a placeholder profile and no cloud credentials, the `scripts/project_id.py` self-check, and the `scripts/drop_dbt_dataset.py --self-check`. `parse` checks the project without connecting to BigQuery; `compile` would need a connection, so it's left out. The placeholder profile is `dbt/ci/profiles.yml`, with the made-up project ID `ci-dummy-project`.
+Test: each hook passes locally; open a PR and the checks go green. Reverse: locally, break each check on purpose (a bad `ref()`, a pattern that allows `/`, a prefix list that allows `raw_`); each hook fails, then restore. In a test PR made in the GitHub web editor, break a `ref()`; checks go red; close it and delete the branch.
 
 **M3-10 · Validate the project ID in every script**
 `drop_table.py`, `dataset.py`, `load.py` and `check_counts.py` build BigQuery IDs from `GCP_PROJECT_ID` without checking it. The Google library puts the ID into the request address unescaped, so a malformed value containing `/` or `?` could point a delete or a table replace at another dataset or table (found in the M3-08 security review). Move the check from `drop_dbt_dataset.py` into one shared file in `scripts/` that every script imports, and switch `drop_dbt_dataset.py` to it. Every script refuses a project ID that breaks Google's rules (6 to 30 characters, lowercase letters, digits and hyphens, starts with a letter, doesn't end with a hyphen) before the BigQuery client is created. The shared file has a self-check with cases for a valid ID, a slash, a question mark and a too-short ID.
@@ -268,6 +268,9 @@ Test: every script runs normally with the real project ID; each refuses `myproj/
 | Oct 2026 | Full rebuilds delete the whole `ecommerce_dbt` dataset with `scripts/drop_dbt_dataset.py` | `drop_table.py` refuses views and `dataset.py` handles only the raw dataset. The dataset name is fixed in the code; the script refuses an invalid project ID (see M3-10 below), refuses if any object isn't named `stg_`, `dim_` or `fct_` (raw tables are `raw_`), and deletes only when the dataset name is typed; a wrong name, no input or Ctrl+C cancels with exit code 1 |
 | Oct 2026 | M3-08's Test and Reverse done as one drop-and-rebuild | Both are the same action (build from an empty dataset), and every build rewrites the mart tables while deleted storage isn't refunded. Raw row counts checked before and after show the raw data was untouched |
 | Oct 2026 | Every script gets its project ID from `scripts/project_id.py`, which refuses an ID that breaks Google's rules before the BigQuery client is created | The library puts the ID into the request address unescaped, so a `/` or `?` could redirect a delete or table replace to another dataset or table. One shared check means no script can skip it, and the scripts' repeated "is it set" lines became one call |
+| Oct 2026 | `dbt parse` and the two script self-checks run as local pre-commit hooks, inside the existing CI job | One config for local and CI checks; the required `pre-commit` check already covers them, so the "Protect main" ruleset is unchanged |
+| Oct 2026 | Placeholder dbt profile `dbt/ci/profiles.yml` committed, with a `.gitignore` exception for that one path | `dbt parse` needs a profile but never connects; it holds only the made-up project ID `ci-dummy-project`. No source or model reads `GCP_PROJECT_ID`, so CI needs no environment variable, and the real profile keeps `env_var('GCP_PROJECT_ID')` with no default so a missing variable still fails |
+| Oct 2026 | CI Reverse test PRs are made in the GitHub web editor | The local hooks block committing a deliberate break, and hooks are never skipped; web-editor commits don't run local hooks |
 
 ## 13. Later (not in current scope)
 

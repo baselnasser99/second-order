@@ -34,7 +34,7 @@ def get_project_id() -> str:
 
 def self_check() -> None:
     """Test the ID check only. Makes no BigQuery connection."""
-    assert is_valid_project_id("second-order-olist")
+    assert is_valid_project_id("example-project-123")
     assert not is_valid_project_id("myproj/datasets/ecommerce_analytics")
     assert not is_valid_project_id("myproj/datasets")
     assert not is_valid_project_id("myproj?x=")

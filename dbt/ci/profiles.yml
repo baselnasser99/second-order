@@ -1,0 +1,12 @@
+# Placeholder profile for the dbt-parse pre-commit hook (local and CI). dbt parse never connects,
+# so the project ID is made up and there are no credentials. Not for real runs: use ~/.dbt/profiles.yml.
+second_order:
+  target: ci
+  outputs:
+    ci:
+      type: bigquery
+      method: oauth
+      project: ci-dummy-project
+      dataset: ecommerce_dbt
+      location: US
+      threads: 1

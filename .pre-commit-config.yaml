@@ -13,3 +13,24 @@ repos:
         name: Detect hardcoded secrets (full history)
         entry: gitleaks git --redact --verbose
         stages: [manual]
+  # Run inside the uv environment, so they use the versions pinned in uv.lock. No cloud credentials.
+  - repo: local
+    hooks:
+      - id: project-id-self-check
+        name: project_id.py self-check
+        entry: uv run scripts/project_id.py
+        language: unsupported
+        files: ^scripts/project_id\.py$
+        pass_filenames: false
+      - id: drop-dbt-dataset-self-check
+        name: drop_dbt_dataset.py self-check
+        entry: uv run scripts/drop_dbt_dataset.py --self-check
+        language: unsupported
+        files: ^scripts/(drop_dbt_dataset|project_id)\.py$
+        pass_filenames: false
+      - id: dbt-parse
+        name: dbt parse (placeholder profile, no connection)
+        entry: uv run dbt parse --project-dir dbt --profiles-dir dbt/ci
+        language: unsupported
+        files: ^dbt/
+        pass_filenames: false
