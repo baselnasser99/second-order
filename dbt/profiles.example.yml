@@ -1,0 +1,13 @@
+# Example dbt connection profile. Copy it to ~/.dbt/profiles.yml (outside the repo).
+# Logs in with `gcloud auth application-default login`. The project ID comes from .env,
+# so run dbt from the repo root with: uv run --env-file .env dbt debug --project-dir dbt
+second_order:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: ecommerce_dbt
+      location: US
+      threads: 4
