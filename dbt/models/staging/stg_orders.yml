@@ -10,6 +10,11 @@ models:
       - name: customer_id
         data_tests:
           - not_null
+          # every order links to a customer
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
       - name: order_status
         data_tests:
           - accepted_values:

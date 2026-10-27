@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: stg_order_reviews
+    data_tests:
+      # review_id alone repeats across orders (docs/data-notes.md question 4); the pair never does
+      - unique:
+          column_name: "review_id || '-' || order_id"
+    columns:
+      - name: review_id
+        data_tests:
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: review_score
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false

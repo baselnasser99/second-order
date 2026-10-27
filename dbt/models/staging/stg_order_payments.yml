@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: stg_order_payments
+    data_tests:
+      # one row per payment number within an order
+      - unique:
+          column_name: "order_id || '-' || cast(payment_sequential as string)"
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: payment_sequential
+        data_tests:
+          - not_null
