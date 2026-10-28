@@ -6,7 +6,7 @@ Every query below was run as written on Oct 28, 2026; the results are from that 
 
 ## Rules for every metric
 
-- Every metric reads a mart table in `ecommerce_dbt`: `dim_customers`, `fct_orders` or `fct_order_items`. Nothing reads raw or staging. The only exception is the hand-checks at the end, which read the raw tables in `ecommerce_analytics` on purpose.
+- Every metric reads a mart table in `ecommerce_dbt`: `dim_customers`, `fct_orders`, `fct_order_items`, or the summary tables `fct_category_summary` and `fct_seller_summary` built from `fct_order_items`. Nothing reads raw or staging. The only exception is the hand-checks at the end, which read the raw tables in `ecommerce_analytics` on purpose.
 - Rates count orders or people, never items. An order with three items counts once.
 - NULL means "no data" and is left out of rates and averages. `COUNT(col)` and `AVG(col)` skip NULLs; `COUNT(*)` doesn't.
 - Money is in Brazilian reais (BRL), stored as NUMERIC (an exact decimal type, so cents never drift).
@@ -153,9 +153,13 @@ One row per item. `is_late` and `review_score` are copied from the order onto ev
 
 Groups with fewer than 30 orders are left out of rankings, so one seller with 2 bad orders can't top the list.
 
-Items whose product has no category are in the category `unknown` (1,603 items, decision log M3-07). `unknown` is kept in every total, so category values still add up to order value; M4-05 decides whether it appears in rankings.
+Items whose product has no category are in the category `unknown` (1,603 items, decision log M3-07). `unknown` is left out of rankings (`in_rankings` = false) but kept in every total, so category values still add up to order value; it has 1,451 orders.
 
 Categories come first, then sellers. Sellers are shown by `seller_id`, a code, because the data has no seller names.
+
+For the dashboard, `fct_category_summary` and `fct_seller_summary` build these numbers, one row per category or seller. They store counts and sums, not finished rates, so Data Studio computes each rate as SUM / SUM and it stays correct in any grouping. Their `in_rankings` column applies the 30-order cut-off (and leaves out `unknown`). The queries in this section stay as the definitions. Result: 62 categories and 634 sellers are in rankings.
+
+Both tables also show `late_orders`, the count, next to the late-order rate, so a high rate on a small seller can be read as a handful of orders.
 
 ### Orders, late-order rate and average review per category
 
@@ -284,7 +288,9 @@ FROM `ecommerce_analytics.raw_order_payments`
 
 Result: 16,008,872.12. Matches.
 
-## 5. Data Studio setup for page 1
+## 5. Data Studio setup
+
+### Data Studio setup for page 1 ("Customers")
 
 The calculated fields below live inside the report's `dim_customers` data source. Removing and re-adding the data source deletes them, so re-enter them from here. Each one matches a metric in section 1.
 
@@ -300,7 +306,7 @@ The calculated fields below live inside the report's `dim_customers` data source
 
 Data source settings: owner's credentials, community visualizations off, `first_order_review_score` default aggregation Average.
 
-### Page 1 charts
+#### Page 1 charts
 
 - Scorecards: People (Record Count, 96,096), Repeat customers (2,997), Repeat rate (3.12%).
 - Return rate by first-order timing: a table with `first_order_timing`, `return_rate_180d` and `people_full_followup`. Filter: include `has_full_followup` = true, exclude `first_order_timing` is null. Result: on time 2.02% (50,681 people), late 1.69% (3,317).
@@ -308,3 +314,22 @@ Data source settings: owner's credentials, community visualizations off, `first_
 - Cross-filtering is off on both tables, so clicking a row doesn't filter the whole page.
 
 Hand-checked with direct SQL on `dim_customers` on Oct 28, 2026: late, on time and score 5 all match.
+
+### Data Studio setup for page 2 ("Money")
+
+Page 2 reads three embedded data sources: `fct_category_summary` and `fct_seller_summary` (section 3), plus the existing `fct_orders` source for the scorecard. Settings on the two summary sources: owner's credentials, community visualizations off, every count and sum column (`orders`, `late_orders`, `orders_with_delivery_date`, `review_score_sum`, `orders_with_review`, `order_value`) default aggregation Sum.
+
+The calculated fields below are the same on both summary sources. Removing and re-adding a source deletes them, so re-enter them from here.
+
+| Field | Formula | Type | Matches |
+|---|---|---|---|
+| `late_order_rate` | `SUM(late_orders) / SUM(orders_with_delivery_date)` | Percent | Late-order rate per category or seller (section 3) |
+| `average_review` | `SUM(review_score_sum) / SUM(orders_with_review)` | Number | Average review per category or seller (section 3) |
+
+#### Page 2 charts
+
+- Category table on `fct_category_summary`: dimension `product_category` ("Category"); metrics `orders` ("Orders"), `late_order_rate` ("Late-order rate", Percent, 2 decimals), `late_orders` ("Late orders"), `average_review` ("Avg review", Number, 2 decimals), `order_value` ("Order value (BRL)", Number, 2 decimals). Filter: include `in_rankings` = true. Sort: `late_order_rate` descending. Cross-filtering off.
+- Seller table on `fct_seller_summary`: the same, with `seller_id` ("Seller ID") as the dimension.
+- Scorecard on `fct_orders`: Sum of `payment_total`, Number, 2 decimals. Filter: include `order_status` in canceled and unavailable (section 2, payments on canceled and unavailable orders).
+
+Hand-checked against direct SQL on Oct 28, 2026, all matching: `bed_bath_table` 9,417 orders, 7.43% late, 3.97 average review, 1,036,988.68 order value; seller `6560211a19b47992c3666cc44a7e94c0` 1,854 orders, 5.28%, 3.94, 123,304.83; scorecard 269,735.11.

@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: fct_seller_summary
+    description: One row per seller, for dashboard page 2. Holds counts and sums, not rates, so each rate is computed as SUM / SUM (late_orders / orders_with_delivery_date, review_score_sum / orders_with_review) and stays correct in any grouping. Every seller is kept, including those under 30 orders, so totals add up; filter on in_rankings for rankings. Order counts across sellers add up to more than total orders, because one order can have items from several sellers.
+    columns:
+      - name: seller_id
+        description: The seller's ID, a code; the data has no seller names.
+        data_tests:
+          - unique
+          - not_null
+      - name: orders
+        description: Number of distinct orders with at least one item from this seller.
+        data_tests:
+          - not_null
+      - name: late_orders
+        description: Orders from this seller delivered after their estimated date. Each order counts once.
+        data_tests:
+          - not_null
+      - name: orders_with_delivery_date
+        description: Orders from this seller that have a delivery date, so can be late or on time. Late-order rate = late_orders / orders_with_delivery_date.
+        data_tests:
+          - not_null
+      - name: review_score_sum
+        description: Sum of the review scores (1 to 5) of orders from this seller, one score per order. NULL when no order has a review. Average review = review_score_sum / orders_with_review.
+      - name: orders_with_review
+        description: Orders from this seller that have a review.
+        data_tests:
+          - not_null
+      - name: order_value
+        description: Sum of this seller's item prices in BRL, freight not included. Only this seller's items count, never the rest of the order, so across all sellers it adds up to the sum of fct_orders.items_value.
+        data_tests:
+          - not_null
+      - name: in_rankings
+        description: True when the seller has at least 30 orders. Rankings use only these rows; totals use all rows.
+        data_tests:
+          - not_null
