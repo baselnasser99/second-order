@@ -119,7 +119,7 @@ FROM `ecommerce_dbt.fct_orders`
 
 Result: 16,008,872.12.
 
-Payment total is higher than order value (13,591,643.70) mainly because it includes freight (2,251,909.54), which order value leaves out. The remaining 165,318.88 comes from installment interest, vouchers, and payments on the 767 orders that have no items.
+Payment total is higher than order value (13,591,643.70) mainly because it includes freight (2,251,909.54), which order value leaves out. Of the remaining 165,318.88, 162,591.95 is payments on the 775 orders (any status) that have no items; the last 2,726.93 is the net of all other differences between payments and items plus freight (installment interest, for example); it wasn't broken down further.
 
 ### Payments on canceled and unavailable orders
 
@@ -139,7 +139,7 @@ WHERE order_status IN ('canceled', 'unavailable')
 GROUP BY order_status
 ```
 
-| Status | Orders | Without items | Without items or payment | Payments (BRL) |
+| Status | Orders | Without items | Without payment | Payments (BRL) |
 |---|---|---|---|---|
 | canceled | 625 | 164 | 0 | 143,255.60 |
 | unavailable | 609 | 603 | 0 | 126,479.51 |
