@@ -93,12 +93,12 @@ Test: `dbt build` passes (unique IDs, no empty keys, every order links to a cust
 
 ### Milestone 4 — Analytics & Dashboard (≈ 15 hours · target: mid-December 2026)
 **Goal:** business metrics answering the question, shown in Looker Studio.
-Closes with M4-07, the rebuild before the sandbox expiry around December 20.
+Closes with M4-07, the first rebuild before the sandbox expiry around December 20; the rebuild then repeats every ~55 days while the dashboard is shared (see M4-07).
 Test: hand-check 2–3 numbers against raw data. Reverse: rebuild dashboard using only mart tables. Every chart has a one-sentence caption.
 
 ### Milestone 5 — Insights & Delivery (≈ 10 hours · target: late December 2026)
 **Goal:** memo, README (finding first, setup last), architecture diagram, 2-minute demo video.
-The demo video is recorded after M4-07, so the tables are freshly rebuilt.
+The demo video can be recorded any time the tables are live; it doesn't wait for M4-07. The project counts as finished when M5 is merged; later rebuilds are maintenance.
 Test: a non-technical friend reads the README and explains the finding back. Reverse: follow your own README on a fresh clone and rebuild everything.
 
 ---
@@ -247,8 +247,8 @@ Test: hand-check one category's and one seller's numbers with direct SQL. Revers
 A one-sentence caption on every chart: what it shows and the main takeaway. Every data source is a mart table.
 Test: every chart has a caption; the report's data source list shows only mart tables. Reverse: make a copy of the report, remove its data sources, add back only the mart tables; every chart still works. Delete the copy.
 
-**M4-07 · Rebuild before the sandbox expiry (around December 20)**
-Raw tables expire around December 25 and dbt tables about a day later. Check each table's expiration date in the BigQuery console first. Then reload raw with `scripts/load.py`, run `dbt build` and run `scripts/check_counts.py`. Check the expiration dates again: if replacing a table's data doesn't reset its expiry, find another way before the old date passes. This is also the first real run of `load.py` with the M3-10 project ID check.
+**M4-07 · Rebuild before each sandbox expiry (first around December 20)**
+Raw tables expire around December 25 and dbt tables about a day later. Check each table's expiration date in the BigQuery console first. Then reload raw with `scripts/load.py`, run `dbt build` and run `scripts/check_counts.py`. Check the expiration dates again: if replacing a table's data doesn't reset its expiry, find another way before the old date passes. This is also the first real run of `load.py` with the M3-10 project ID check. After the first run, repeat this every ~55 days for as long as the dashboard is shared (co-op applications run through about August 2027), and set a calendar reminder for the next date each time. The issue closes after the first run; later runs need no new issue unless something breaks.
 Test: counts 9/9, `dbt build` passes, the dashboard headline is unchanged, and the new expiry dates are in late February 2027. Reverse: n/a.
 
 ---
@@ -315,6 +315,7 @@ Test: counts 9/9, `dbt build` passes, the dashboard headline is unchanged, and t
 | Oct 2026 | Data Studio report uses owner's credentials and stays private (Restricted, owner only) until M5 | Recruiters won't have BigQuery access, so viewer's credentials would show blank charts. The data is public and small, and queries stay well inside the sandbox's free 1 TB a month. Sharing waits until the dashboard is finished |
 | Oct 2026 | One embedded data source per mart (`dim_customers`, `fct_orders`, `fct_order_items`), community visualizations off, review scores and `delivery_days` default to Average | Embedded keeps everything inside the one report, so it copies and rebuilds as a unit (M4-06 Reverse). No third-party chart plug-ins means none can read the data (least privilege). Summing scores or days means nothing, so Average is the safe default. Re-adding a source resets these settings, so they're redone each time |
 | Oct 2026 | Google renamed Looker Studio to Data Studio; existing text keeps "Looker Studio" until the M5 README pass | One rename pass at the end instead of editing every issue now |
+| Oct 2026 | M4-07 becomes a recurring rebuild (first around December 20, then every ~55 days while the dashboard is shared); the demo video no longer waits for it; the project counts as finished when M5 is merged | Sandbox tables expire 60 days after they're written, so rebuilding early only moves the date by days, and a shared dashboard goes blank 60 days after the last rebuild. The tables are live now, so the video can be recorded on them. Milestone due dates stay as they are (December 20 and 31): they're deadlines, and finishing earlier needs no change |
 
 ## 14. Later (not in current scope)
 
