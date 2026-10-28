@@ -304,20 +304,20 @@ The calculated fields below live inside the report's `dim_customers` data source
 
 `return_rate_180d` divides by full-follow-up people itself, so it stays correct even if a chart's filter is missing. `first_order_timing` names both cases, so a NULL stays NULL instead of being labelled "On time".
 
-Data source settings: owner's credentials, community visualizations off, `first_order_review_score` default aggregation Average.
+Data source settings: owner's credentials, community visualizations off, `first_order_review_score` default aggregation Average. Data Studio fills in `first_order_at` as the date range dimension, with the default date range "Auto: All available dates"; leave it as it is.
 
 #### Page 1 charts
 
-- Scorecards: People (Record Count, 96,096), Repeat customers (2,997), Repeat rate (3.12%).
-- Return rate by first-order timing: a table with `first_order_timing`, `return_rate_180d` and `people_full_followup`. Filter: include `has_full_followup` = true, exclude `first_order_timing` is null. Result: on time 2.02% (50,681 people), late 1.69% (3,317).
-- Return rate by first-order review score: the same table with `first_order_review_score`, sorted ascending. Filter: include `has_full_followup` = true, exclude `first_order_review_score` is null. Results: 1 = 1.68% (6,544), 2 = 1.53% (1,832), 3 = 1.98% (4,800), 4 = 1.84% (10,913), 5 = 2.15% (31,437).
+- Scorecards: "People" (Record Count, 96,096), "Repeat customers" (2,997), "Repeat rate" (3.12%).
+- Return rate by first-order timing: a table with `first_order_timing` ("First order"), `return_rate_180d` ("180-day return rate") and `people_full_followup` ("People"), sorted by `return_rate_180d` descending. Filter "Full follow-up, has timing": include `has_full_followup` = true AND exclude `first_order_timing` is null. Result: on time 2.02% (50,681 people), late 1.69% (3,317).
+- Return rate by first-order review score: the same table with `first_order_review_score` ("First-order review (1–5)"), `return_rate_180d` ("180-day return rate") and `people_full_followup` ("People"), sorted ascending. Filter "Full follow-up, has review": include `has_full_followup` = true AND exclude `first_order_review_score` is null. Results: 1 = 1.68% (6,544), 2 = 1.53% (1,832), 3 = 1.98% (4,800), 4 = 1.84% (10,913), 5 = 2.15% (31,437).
 - Cross-filtering is off on both tables, so clicking a row doesn't filter the whole page.
 
 Hand-checked with direct SQL on `dim_customers` on Oct 28, 2026: late, on time and score 5 all match.
 
 ### Data Studio setup for page 2 ("Money")
 
-Page 2 reads three embedded data sources: `fct_category_summary` and `fct_seller_summary` (section 3), plus the existing `fct_orders` source for the scorecard. Settings on the two summary sources: owner's credentials, community visualizations off, every count and sum column (`orders`, `late_orders`, `orders_with_delivery_date`, `review_score_sum`, `orders_with_review`, `order_value`) default aggregation Sum.
+Page 2 reads three embedded data sources: `fct_category_summary` and `fct_seller_summary` (section 3), plus the existing `fct_orders` source for the scorecard. Settings on the two summary sources: owner's credentials, community visualizations off, every count and sum column (`orders`, `late_orders`, `orders_with_delivery_date`, `review_score_sum`, `orders_with_review`, `order_value`) default aggregation Sum. Settings on `fct_orders`: owner's credentials, community visualizations off, `review_score` and `delivery_days` default aggregation Average. Data Studio fills in `order_purchase_timestamp` as its date range dimension, with the default date range "Auto: All available dates"; leave it as it is.
 
 The calculated fields below are the same on both summary sources. Removing and re-adding a source deletes them, so re-enter them from here.
 
@@ -328,11 +328,17 @@ The calculated fields below are the same on both summary sources. Removing and r
 
 #### Page 2 charts
 
-- Category table on `fct_category_summary`: dimension `product_category` ("Category"); metrics `orders` ("Orders"), `late_order_rate` ("Late-order rate", Percent, 2 decimals), `late_orders` ("Late orders"), `average_review` ("Avg review", Number, 2 decimals), `order_value` ("Order value (BRL)", Number, 2 decimals). Filter: include `in_rankings` = true. Sort: `late_order_rate` descending. Cross-filtering off.
-- Seller table on `fct_seller_summary`: the same, with `seller_id` ("Seller ID") as the dimension.
-- Scorecard on `fct_orders`: Sum of `payment_total`, Number, 2 decimals. Filter: include `order_status` in canceled and unavailable (section 2, payments on canceled and unavailable orders).
+- Category table on `fct_category_summary`: dimension `product_category` ("Category"); metrics `orders` ("Orders"), `late_order_rate` ("Late-order rate", Percent, 2 decimals), `late_orders` ("Late orders"), `average_review` ("Avg review", Number, 2 decimals), `order_value` ("Order value (BRL)", Number, 2 decimals). Filter "In rankings": include `in_rankings` = true. Sort: `late_order_rate` descending. Cross-filtering off.
+- Seller table on `fct_seller_summary`: the same, with `seller_id` ("Seller ID") as the dimension and its own filter "In rankings (sellers)": include `in_rankings` = true. Filters belong to one data source, so each table needs its own.
+- Scorecard on `fct_orders`, labelled "Payments on canceled and unavailable orders (BRL)": Sum of `payment_total`, Number, 2 decimals. Filter "Canceled or unavailable": include `order_status` in canceled, unavailable (section 2, payments on canceled and unavailable orders).
 
 Hand-checked against direct SQL on Oct 28, 2026, all matching: `bed_bath_table` 9,417 orders, 7.43% late, 3.97 average review, 1,036,988.68 order value; seller `6560211a19b47992c3666cc44a7e94c0` 1,854 orders, 5.28%, 3.94, 123,304.83; scorecard 269,735.11.
+
+The M4-06 Reverse step rebuilt a copy of the report from mart tables only on Oct 29, 2026, and every chart matched.
+
+### Rebuilding a data source
+
+After a data source is removed and re-added, charts can swap in other fields (for example `number_of_orders` or Record Count), lose their filters (shown as a pink broken filter) and lose their labels, so check every chip against this section. If a chart can't find the new source's fields, switch its data source to another one and back. Re-add the source and its calculated fields before reconnecting charts. "Make a copy" once failed with an `errorStatus` code 3 page; closing the browser and trying again worked.
 
 ### Captions
 
