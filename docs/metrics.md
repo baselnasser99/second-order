@@ -283,3 +283,28 @@ FROM `ecommerce_analytics.raw_order_payments`
 ```
 
 Result: 16,008,872.12. Matches.
+
+## 5. Data Studio setup for page 1
+
+The calculated fields below live inside the report's `dim_customers` data source. Removing and re-adding the data source deletes them, so re-enter them from here. Each one matches a metric in section 1.
+
+| Field | Formula | Type | Matches |
+|---|---|---|---|
+| `repeat_customers` | `SUM(CASE WHEN is_repeat_customer = true THEN 1 ELSE 0 END)` | Number | Repeat customers (2,997) |
+| `repeat_rate` | `SUM(CASE WHEN is_repeat_customer = true THEN 1 ELSE 0 END) / COUNT(customer_unique_id)` | Percent | Repeat rate (3.12%) |
+| `people_full_followup` | `SUM(CASE WHEN has_full_followup = true THEN 1 ELSE 0 END)` | Number | People with full follow-up (56,007) |
+| `return_rate_180d` | `SUM(CASE WHEN returned_within_180_days = true THEN 1 ELSE 0 END) / SUM(CASE WHEN has_full_followup = true THEN 1 ELSE 0 END)` | Percent | 180-day return rate (1.99%) |
+| `first_order_timing` | `CASE WHEN first_order_is_late = true THEN "Late" WHEN first_order_is_late = false THEN "On time" END` | Text | Label for `first_order_is_late` |
+
+`return_rate_180d` divides by full-follow-up people itself, so it stays correct even if a chart's filter is missing. `first_order_timing` names both cases, so a NULL stays NULL instead of being labelled "On time".
+
+Data source settings: owner's credentials, community visualizations off, `first_order_review_score` default aggregation Average.
+
+### Page 1 charts
+
+- Scorecards: People (Record Count, 96,096), Repeat customers (2,997), Repeat rate (3.12%).
+- Return rate by first-order timing: a table with `first_order_timing`, `return_rate_180d` and `people_full_followup`. Filter: include `has_full_followup` = true, exclude `first_order_timing` is null. Result: on time 2.02% (50,681 people), late 1.69% (3,317).
+- Return rate by first-order review score: the same table with `first_order_review_score`, sorted ascending. Filter: include `has_full_followup` = true, exclude `first_order_review_score` is null. Results: 1 = 1.68% (6,544), 2 = 1.53% (1,832), 3 = 1.98% (4,800), 4 = 1.84% (10,913), 5 = 2.15% (31,437).
+- Cross-filtering is off on both tables, so clicking a row doesn't filter the whole page.
+
+Hand-checked with direct SQL on `dim_customers` on Oct 28, 2026: late, on time and score 5 all match.
