@@ -333,3 +333,18 @@ The calculated fields below are the same on both summary sources. Removing and r
 - Scorecard on `fct_orders`: Sum of `payment_total`, Number, 2 decimals. Filter: include `order_status` in canceled and unavailable (section 2, payments on canceled and unavailable orders).
 
 Hand-checked against direct SQL on Oct 28, 2026, all matching: `bed_bath_table` 9,417 orders, 7.43% late, 3.97 average review, 1,036,988.68 order value; seller `6560211a19b47992c3666cc44a7e94c0` 1,854 orders, 5.28%, 3.94, 123,304.83; scorecard 269,735.11.
+
+### Captions
+
+Captions live inside the report and are lost with it, so this is the permanent copy; each is one sentence, placed in a small grey text box under its chart.
+
+| Page | Chart | Caption |
+|---|---|---|
+| Customers | People | 96,096 different people placed at least one order between 2016 and 2018. |
+| Customers | Repeat customers | 2,997 people placed more than one order, counting orders of any status, including same-day ones. |
+| Customers | Repeat rate | Only about 3 in every 100 people ever placed a second order. |
+| Customers | Return rate by first-order timing | People whose first order arrived late returned within 180 days slightly less often (1.69% of 3,317 people vs 2.02% of 50,681), but both groups sit near 2%, so delivery timing alone doesn't explain why customers don't come back. |
+| Customers | Return rate by first-order review score | Whatever score people gave their first order, from 1 to 5, only 1.5–2.2% came back within 180 days, so even happy first-time customers rarely return. |
+| Money | Payments scorecard | Customers paid 269,735.11 BRL on 1,234 orders that were canceled or unavailable; the data doesn't show refunds, so this is money at risk, not a confirmed loss. |
+| Money | Category table | Categories with 30+ orders, ranked by late-order rate (a high rate on a small category can mean just a few late orders); items with no category ("unknown", 1,451 orders) count in totals but not in this ranking. |
+| Money | Seller table | The highest late rates belong to small sellers (the top one has 14 late orders), while one large seller at 9.71% has 172, more than the 10 highest-rate sellers combined (140). |
