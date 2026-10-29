@@ -40,14 +40,9 @@ flowchart TD
     end
 
     CSV["Olist CSV files<br/>from Kaggle"] --> LOAD["Python loader"]
-    LOAD --> RAW
+    LOAD --> RAW["BigQuery sandbox<br/>raw tables<br/>ecommerce_analytics"]
     RAW --> DBT["dbt models and data tests"]
-    DBT --> MART
-
-    subgraph BQ ["BigQuery sandbox"]
-        RAW["Raw tables<br/>ecommerce_analytics"]
-        MART["Staging views and mart tables<br/>ecommerce_dbt"]
-    end
+    DBT --> MART["BigQuery sandbox<br/>staging views and mart tables<br/>ecommerce_dbt"]
 
     MART --> DASH["Data Studio dashboard"]
     DASH --> OUT["Memo, README and demo video"]
