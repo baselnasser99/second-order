@@ -51,7 +51,7 @@ Result: 2,997 / 96,096 = 3.12%.
 
 ### 180-day return rate
 
-Of the people with full follow-up (first order on or before 2018-02-22), the share who came back within 180 days. Uses `has_full_followup` and `returned_within_180_days`. A same-day order and a canceled or unavailable order don't count as coming back (decision log). People without full follow-up are left out, so everyone compared had the same 180 days to return.
+Of the people with full follow-up (first order on or before 2018-02-22), the share who came back within 180 days. Uses `has_full_followup` and `returned_within_180_days`. A same-day order and a canceled or unavailable order don't count as coming back (decision log). People without full follow-up are left out, so everyone compared had the same 180 days to return. The data ends 2018-08-21, 180 days after 2018-02-22.
 
 ```sql
 SELECT
