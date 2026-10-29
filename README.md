@@ -29,3 +29,29 @@ It prints one line per table and exits with code 1 if any table is missing or it
 ## License
 
 [MIT](LICENSE)
+
+## How it works
+
+```mermaid
+flowchart TD
+    subgraph GH ["GitHub"]
+        BOARD["Projects board<br/>one issue per step"] --> REPO["Repo, protected main"]
+        ACT["GitHub Actions<br/>lint, secret scan, dbt parse<br/>no cloud credentials"] -->|"checks every push and PR"| REPO
+    end
+
+    CSV["Olist CSV files<br/>from Kaggle"] --> LOAD["Python loader"]
+    LOAD --> RAW
+    RAW --> DBT["dbt models and data tests"]
+    DBT --> MART
+
+    subgraph BQ ["BigQuery sandbox"]
+        RAW["Raw tables<br/>ecommerce_analytics"]
+        MART["Staging views and mart tables<br/>ecommerce_dbt"]
+    end
+
+    MART --> DASH["Data Studio dashboard"]
+    DASH --> OUT["Memo, README and demo video"]
+
+    REPO -.->|"holds the code"| LOAD
+    REPO -.->|"holds the code"| DBT
+```
