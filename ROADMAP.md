@@ -25,11 +25,13 @@ Olist's raw sales data (CSV files) gets loaded by a Python script into BigQuery,
 Olist CSV files (Kaggle)
         │  Python loader (Milestone 2)
         ▼
-BigQuery dataset: ecommerce_analytics
-   raw tables ──dbt──► staging tables ──dbt──► mart tables   (Milestone 3)
+BigQuery dataset ecommerce_analytics: raw tables
+        │  dbt (Milestone 3)
+        ▼
+BigQuery dataset ecommerce_dbt: staging views ──dbt──► mart tables
         │
         ▼
-Looker Studio dashboard (Milestone 4)
+Data Studio dashboard (Milestone 4)
         │
         ▼
 Recommendation memo + README + demo video (Milestone 5)
