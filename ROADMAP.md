@@ -53,7 +53,7 @@ Around everything: GitHub repo · GitHub Actions checks · GitHub Projects board
 
 - One issue at a time, each on its own branch, merged into `main` through a reviewed pull request.
 - Every issue follows the loop in Section 6 and passes the security checklist in Section 7.
-- Decisions are recorded in Section 13 when they're made, not afterwards.
+- Decisions are recorded in Section 14 when they're made, not afterwards.
 - The owner handles all logins and credentials personally and reviews every change before merging.
 
 ## 6. The working loop: Build → Test → Reverse → Refactor
@@ -253,7 +253,37 @@ Test: counts 9/9, `dbt build` passes, the dashboard headline is unchanged, and t
 
 ---
 
-## 13. Decision log
+## 13. Milestone 5 issues (copy each into GitHub Issues)
+
+Each issue uses the same checklist as Section 9.
+
+**M5-01 · Recommendation memo**
+`docs/memo.md`, one page, written for Olist's leadership: the finding, the evidence, what to fix first, and the limits of the data. Findings: only 3.12% of people ever order twice; about 2% return within 180 days whatever their first experience (late 1.69% vs on time 2.02%; review scores 1–5 all between 1.5% and 2.2%); the highest late rates belong to small sellers, while one large seller at 9.71% has 172 late orders, more than the 10 highest-rate sellers combined (140); 269,735.11 BRL was paid on 1,234 canceled or unavailable orders. Wording rules: don't claim late deliveries cause customers to leave (the data shows they leave either way); call the 269,735.11 BRL money at risk, not a loss (the data has no refunds); explain why payments (16,008,872.12) are higher than order value (13,591,643.70), mainly freight. Limits: data covers 2016 to 2018-08-21, shows patterns rather than causes, and has no refunds or seller names.
+Test: every number in the memo appears in `docs/metrics.md` with the same value; tick each one off. Reverse: n/a.
+
+**M5-02 · Architecture diagram**
+A Mermaid diagram in the README (GitHub draws it from text, so there's no image file to keep up to date), matching Section 3: CSVs → Python loader → raw tables → dbt staging → dbt marts → Data Studio, with GitHub Actions and the project board around it.
+Test: the diagram displays on the repo's GitHub page and matches Section 3. Reverse: n/a.
+
+**M5-03 · README, finding first, setup last**
+Order: the headline finding and one dashboard screenshot; the business question; the main findings (from the memo); the dashboard link (added in M5-04) and video link (added in M5-05); the architecture diagram; how it's built and the key decisions; known limits; setup from a fresh clone; data credit (Olist, CC BY-NC-SA 4.0) and license. Rename "Looker Studio" to "Data Studio" in the README and in ROADMAP.md Sections 2–4 and 8. The M4 issue texts (Section 12) and the decision log (Section 14) stay as written, since they record what was true at the time. Screenshots show only the report canvas, with no account email, avatar or project ID. Merged before December 18, so M5-06 can test it.
+Test: a non-technical friend reads the README and explains the finding back in their own words; note anything they misread and fix it. Reverse: done in M5-06.
+
+**M5-04 · Share the dashboard view-only**
+Change the report from Restricted to "anyone with the link can view". Never give edit access. Turn off downloading, copying and printing for viewers. Add the link to the README. Record the sharing settings in the decision log, including that viewers' chart queries count against the owner's free 1 TB a month.
+Test: open the link in a private browser window while logged out; every chart shows data, there's no edit button, and your email doesn't appear anywhere on the page. Reverse: n/a.
+
+**M5-05 · Two-minute demo video**
+Write the script first: the finding (20 seconds), a walk through both dashboard pages (60 seconds), how the pipeline works (25 seconds), and what Olist should do next (15 seconds). Record on the live tables, hosted unlisted (for example on YouTube) and linked from the README, never committed to the repo. No email, avatar, project ID or terminal history on screen.
+Test: the video is under 2:00; watch it through once only to check for personal details. Reverse: n/a.
+
+**M5-06 · Fresh-clone rebuild from the README (December 18, also the first M4-07 rebuild)**
+First, check every table's expiration date in the BigQuery console and write them down. Then clone the repo into a new folder outside `second-order` and follow only the README to set up and rebuild: environment, `.env`, `profiles.yml` from the example, load raw with `scripts/load.py`, `dbt build`, `scripts/check_counts.py`. This is also the first real run of `load.py` with the M3-10 project ID check. Write down every step where you had to guess or use something the README doesn't say. Fix the README from your usual `second-order` folder, not the fresh clone, because the clone has no local excludes or `commit-msg` hook. Delete the fresh clone afterwards, since it holds a `.env`. Check the expiration dates again: if replacing a table's data didn't reset its expiry, find another way before the old date passes (raw around December 25, dbt a day later). Set a calendar reminder for the next rebuild, about 55 days later (around February 11, 2027). Close M4-07 and M5-06 together.
+Test: expiry dates noted before the rebuild; counts 9/9; `dbt build` passes; the dashboard headline is unchanged; the new expiry dates are in late February 2027. Reverse: this issue is itself the M5 Reverse step.
+
+---
+
+## 14. Decision log
 
 | Date | Decision | Why |
 |---|---|---|
@@ -323,8 +353,9 @@ Test: counts 9/9, `dbt build` passes, the dashboard headline is unchanged, and t
 | Oct 2026 | Category `unknown` is left out of rankings (`in_rankings` = false) but kept in totals | It is 610 unlabeled products mixed together, not a category Olist can act on; the caption will give its order count |
 | Oct 2026 | Page 2 tables show `late_orders` (the count) next to the late-order rate | The highest rates belong to small sellers near the 30-order cut-off (for example 14 late orders, 32.56% of the 43 with a delivery date), while a seller with 1,806 orders at 9.71% has 172. Showing the count lets readers judge size; the ranking stays by rate, as M4-05 specifies |
 | Oct 2026 | `fct_order_items` removed from the report | No chart uses it, and it's one less source to rebuild. The summary models are built from it, and `docs/metrics.md` section 3 still queries it as the definition. Supersedes the M4-03 data-source row and 'the report now reads five mart tables' |
+| Oct 2026 | The M5-06 fresh-clone rebuild is also the first M4-07 rebuild, on December 18; M5 now finishes around December 18–20 | Both reload raw and run `dbt build`, so one run covers both, saving time and sandbox storage (never refunded). December 18 leaves a week before raw tables expire around December 25; if the README fails partway, the known commands still finish the rebuild in time. M4-07's expiry checks move into M5-06's Test. Milestone due dates stay as they are (December 20 and 31) |
 
-## 14. Later (not in current scope)
+## 15. Later (not in current scope)
 
 - Cloud Storage raw bucket (needs billing + budget alert; free only in us-east1/us-west1/us-central1)
 - Scheduled pipeline runs
