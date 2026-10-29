@@ -283,81 +283,109 @@ Test: the video is under 2:00; watch it through once only to check for personal 
 First, check every table's expiration date in the BigQuery console and write them down. Then clone the repo into a new folder outside `second-order` and follow only the README to set up and rebuild: environment, `.env`, `profiles.yml` from the example, load raw with `scripts/load.py`, `dbt build`, `scripts/check_counts.py`. This is also the first real run of `load.py` with the M3-10 project ID check. Write down every step where you had to guess or use something the README doesn't say. Fix the README from your usual `second-order` folder, not the fresh clone, because the clone has no local excludes or `commit-msg` hook. Delete the fresh clone afterwards, since it holds a `.env`. Check the expiration dates again: if replacing a table's data didn't reset its expiry, find another way before the old date passes (raw around December 25, dbt a day later). Set a calendar reminder for the next rebuild, about 55 days later (around February 11, 2027). Close M4-07 and M5-06 together.
 Test: expiry dates noted before the rebuild; counts 9/9; `dbt build` passes; the dashboard headline is unchanged; the new expiry dates are in late February 2027. Reverse: this issue is itself the M5 Reverse step.
 
+**M5-07 · Tidy the decision log**
+Group the decision log (Section 14) by milestone instead of by date, merge decisions that took several rows into one row showing where they ended up, and cut each reason to one or two plain sentences, keeping the numbers that matter and pointing to `docs/metrics.md` or `docs/data-notes.md` for detail. No decision is removed and no number changes; the full history stays in git.
+Test: every row of the old log is in the new one, alone or merged, and every number matches; every "decision log" reference in the repo still finds its decision. Reverse: n/a.
+
 ---
 
 ## 14. Decision log
 
-| Date | Decision | Why |
-|---|---|---|
-| Oct 2026 | Google Cloud (BigQuery) over AWS | Permanent free tier with no credit card; AWS free plan closes after 6 months |
-| Oct 2026 | No Cloud Storage bucket | Needs a billing account; data is small enough to load straight into BigQuery |
-| Oct 2026 | Python setup script instead of Terraform | Terraform matters little for analyst/PM roles; script keeps reproducibility with less to learn |
-| Oct 2026 | Looker Studio instead of Streamlit | No stored keys needed; no hosting to maintain |
-| Oct 2026 | GitHub Actions with zero cloud credentials | Automated quality and secret checks without any credential exposure |
-| Oct 2026 | dbt Core stable 1.x | 2.0 is still alpha; beginner needs stability (superseded below) |
-| Oct 2026 | Early commits pushed directly to main | Nothing to open a PR against yet; PR rule applies from M1-02 |
-| Oct 2026 | Ruleset instead of classic branch protection | Applies to admins too, through an empty bypass list |
-| Oct 2026 | Pull requests need 0 approvals | Solo project; GitHub doesn't allow approving your own PR |
-| Oct 2026 | Dependabot security updates off for now | No dependencies yet; revisit in M1-04 |
-| Oct 2026 | Milestone due dates set to the last day of each target period | Section 8 gives rough targets ("late November"); GitHub needs an exact date |
-| Oct 2026 | Project board is public | Lets reviewers and recruiters see how the work is tracked; it holds only issue titles and statuses |
-| Oct 2026 | Python pinned to 3.13 (`requires-python = "==3.13.*"`) | Newest version supported by dbt-core, dbt-bigquery and google-cloud-bigquery; pinned in `pyproject.toml` because `.gitignore` ignores `.python-version` |
-| Oct 2026 | Dependabot security updates stay off until M1-05 | M1-04 adds no libraries; turn on when the first one arrives |
-| Oct 2026 | No service account key files | Log in with gcloud application-default login instead; nothing to leak from the repo |
-| Oct 2026 | Dependabot security updates on | First libraries (pre-commit, ruff) arrived in M1-05; Dependabot only opens PRs for known vulnerabilities, and they still go through protected `main` |
-| Oct 2026 | pre-commit hooks pinned to commit SHAs, not tags | A tag can be moved to point at different code; a SHA cannot. Release version kept in a comment for readability |
-| Oct 2026 | GitHub Actions runs pre-commit itself, actions pinned to commit SHAs | One config for local and CI checks, so they can't disagree; SHAs for the same reason as the hooks |
-| Oct 2026 | Extra manual-stage `gitleaks-history` hook for CI | The standard gitleaks hook scans only staged changes, which are empty in CI; this one scans the full history with the same pinned version |
-| Oct 2026 | `pre-commit` is a required status check in "Protect main" | Without it a red check is only a warning; tied to the GitHub Actions app so nothing else can report a pass. "Branch must be up to date" left off (solo project) |
-| Oct 2026 | Stay on BigQuery sandbox; tables expire after 60 days | Free with no billing; the pipeline rebuilds everything with one command, so rebuild before any demo |
-| Oct 2026 | `.env` loaded with `uv run --env-file`, no python-dotenv | uv already reads env files; one less library to pin and audit (dbt-core 1.12 installs python-dotenv as a dependency since M3-01; our code still doesn't use it) |
-| Oct 2026 | Dataset delete refuses if any tables exist and asks for confirmation | Protects loaded data; BigQuery also enforces it (`delete_contents=False`) |
-| Oct 2026 | Raw tables load every column as STRING | Keeps data exactly as delivered (e.g. leading zeros in zip codes); types are fixed in dbt staging |
-| Oct 2026 | Loader replaces each raw table on every run (`WRITE_TRUNCATE`) | Running it twice gives the same table instead of duplicate rows |
-| Oct 2026 | Olist data never committed | CC BY-NC-SA 4.0 license; downloaded Oct 26, 2026; `data/` is gitignored |
-| Oct 2026 | dbt v1.12, with dbt-core and dbt-bigquery pinned explicitly to 1.12.x | v2 went GA Sept 2026 but is new; v1.12 is maintained until July 2027, past project end, and most learning material targets v1. Both the `dbt` and `dbt-core` package names have v2 releases, so an unpinned install can pull v2 |
-| Oct 2026 | dbt builds into its own datasets, separate from raw | "Drop all dbt tables" can never touch the loaded data |
-| Oct 2026 | No dbt packages; views and tables only | Built-in tests are enough; sandbox doesn't allow MERGE, so no incremental models |
-| Oct 2026 | CI runs `dbt parse`, not `compile` | `parse` needs no warehouse connection, keeping CI credential-free |
-| Oct 2026 | dbt models build into dataset `ecommerce_dbt` (US) | Same location as the raw dataset so joins work; dropping it can't touch raw data |
-| Oct 2026 | Sandbox storage is a 10 GiB lifetime budget | Deleted data isn't refunded, so staging models will be views, Reverse steps rebuild only what an issue touched, and raw data is reloaded only when needed |
-| Oct 2026 | profiles.yml outside the repo, profiles.example.yml committed | No connection details in git, but a fresh clone can still be set up |
-| Oct 2026 | Staging views and mart tables both build into `ecommerce_dbt`; no custom schema per folder | One dbt dataset to drop and rebuild in Reverse steps; a `+schema` setting would add a second dataset (`ecommerce_dbt_staging`) for no gain at this size |
-| Oct 2026 | `dim_customers` counts orders of every status in `number_of_orders` | Keeps the mart a plain record of what people ordered; the dashboard can filter by status later |
-| Oct 2026 | `dim_customers.customer_state` is the state on the person's most recent order | A person can order from more than one state; the latest one is where they are now. Ties on purchase time are broken by `order_id` so the result never changes between runs |
-| Oct 2026 | `fct_orders` keeps `items_value`, `freight_value` and `payment_total` as separate columns | They don't always add up (vouchers, installment fees), so combining them would hide real differences |
-| Oct 2026 | `fct_orders` orders with no items or no payments get NULL, not 0 | A 0 would drag averages down; NULL means "no data" and is left out of averages |
-| Oct 2026 | `fct_orders.review_score` is the order's most recent review (by `review_creation_date`, `review_id` as tie-break) | 547 orders have more than one review; keeping one per order stops row duplication, and the tie-break keeps the result the same between runs |
-| Oct 2026 | `delivery_days` = calendar days from purchase to delivery to the customer; `is_late` = delivered date after the estimated date; both NULL with no delivery date | NULL means "not delivered yet". 8 orders are marked `delivered` but have no delivery date, so they get NULL too |
-| Oct 2026 | Reverse steps drop one dbt table with `scripts/drop_table.py` | Works only in `ecommerce_dbt`, refuses views and names with dots, and asks for the table name before deleting, so it can't touch raw data or staging |
-| Oct 2026 | `fct_order_items.product_category` = English name, else Portuguese name, else `'unknown'` | 2 categories (13 products) have no translation and 610 products have no category (docs/data-notes.md question 7); every item keeps a category, so none drop out of per-category totals |
-| Oct 2026 | `fct_order_items` repeats the order-level `is_late` and `review_score` on every item | Lets item and seller analysis filter by them; averaging them per item weights multi-item orders more, so M4 averages them per order |
-| Oct 2026 | Mart descriptions copied into BigQuery with `persist_docs`, for marts only | Descriptions show in the BigQuery console and Looker Studio's field list; it writes only table metadata, so it uses no storage. Staging views have no descriptions and Looker Studio reads only marts |
-| Oct 2026 | Full rebuilds delete the whole `ecommerce_dbt` dataset with `scripts/drop_dbt_dataset.py` | `drop_table.py` refuses views and `dataset.py` handles only the raw dataset. The dataset name is fixed in the code; the script refuses an invalid project ID (see M3-10 below), refuses if any object isn't named `stg_`, `dim_` or `fct_` (raw tables are `raw_`), and deletes only when the dataset name is typed; a wrong name, no input or Ctrl+C cancels with exit code 1 |
-| Oct 2026 | M3-08's Test and Reverse done as one drop-and-rebuild | Both are the same action (build from an empty dataset), and every build rewrites the mart tables while deleted storage isn't refunded. Raw row counts checked before and after show the raw data was untouched |
-| Oct 2026 | Every script gets its project ID from `scripts/project_id.py`, which refuses an ID that breaks Google's rules before the BigQuery client is created | The library puts the ID into the request address unescaped, so a `/` or `?` could redirect a delete or table replace to another dataset or table. One shared check means no script can skip it, and the scripts' repeated "is it set" lines became one call |
-| Oct 2026 | `dbt parse` and the two script self-checks run as local pre-commit hooks, inside the existing CI job | One config for local and CI checks; the required `pre-commit` check already covers them, so the "Protect main" ruleset is unchanged |
-| Oct 2026 | Placeholder dbt profile `dbt/ci/profiles.yml` committed, with a `.gitignore` exception for that one path | `dbt parse` needs a profile but never connects; it holds only the made-up project ID `ci-dummy-project`. No source or model reads `GCP_PROJECT_ID`, so CI needs no environment variable, and the real profile keeps `env_var('GCP_PROJECT_ID')` with no default so a missing variable still fails |
-| Oct 2026 | CI Reverse test PRs are made in the GitHub web editor | The local hooks block committing a deliberate break, and hooks are never skipped; web-editor commits don't run local hooks |
-| Oct 2026 | Milestone 4 and 5 targets moved to December 2026 | M3 finished in late October, three months early. Finishing before the MS starts in January 2027, with the M4-07 rebuild before the sandbox tables expire around December 25, leaves slack. GitHub milestone due dates updated to match (December 20 and December 31) |
-| Oct 2026 | End of data is 2018-08-21; full follow-up = first order on or before 2018-02-22 | Daily orders fall from about 277 to 1 between Aug 22 and Aug 31, and Sept–Oct 2018 hold only 20 orders, so a later end date would count people as fully followed up when the data stops recording their orders. 56,007 people have full follow-up |
-| Oct 2026 | `returned_within_180_days` counts only a non-canceled, non-unavailable order on a later calendar day, at most 180 calendar days after the first order's date; people whose first order was canceled or unavailable stay in the comparison | 897 of 2,997 repeat customers' second order was on the same day as their first, and 66 repeat customers' other orders were all canceled or unavailable; neither is a customer coming back. With the 2018-08-21 end date, 1,116 of 56,007 full-follow-up people returned (1.99%). 900 of them had a canceled or unavailable first order (16 returned); they are people Olist lost at the first attempt, so they stay. Leaving them out would change the rate only to 2.00%, and all but 6 have a NULL `first_order_is_late` (no delivery date), so they drop out of the late vs on-time chart on their own |
-| Oct 2026 | Order value = `items_value` (sum of item prices, freight not included), on page 1 and page 2 | Page 2 splits value by category and seller, and only item prices can be split that way (`fct_order_items.price`). `items_value` is the sum of those same prices, so both pages add up to the same total (13,591,643.70). Payment total stays a separate metric (M3-06) |
-| Oct 2026 | "Payments on canceled and unavailable orders" uses `payment_total`, not `items_value`, and is one total, not split by category or seller | 767 of the 1,234 canceled and unavailable orders (62.2%) have no items: 164 of 625 canceled and 603 of 609 unavailable. That is above the 10% limit set for this choice. Orders with no items have no category or seller, so they can't be split that way. 0 orders have neither items nor payment, so `payment_total` covers all of them: 269,735.11 BRL, against 97,242.96 from `items_value` |
-| Oct 2026 | Data Studio report uses owner's credentials and stays private (Restricted, owner only) until M5 | Recruiters won't have BigQuery access, so viewer's credentials would show blank charts. The data is public and small, and queries stay well inside the sandbox's free 1 TB a month. Sharing waits until the dashboard is finished |
-| Oct 2026 | One embedded data source per mart (`dim_customers`, `fct_orders`, `fct_order_items`), community visualizations off, review scores and `delivery_days` default to Average | Embedded keeps everything inside the one report, so it copies and rebuilds as a unit (M4-06 Reverse). No third-party chart plug-ins means none can read the data (least privilege). Summing scores or days means nothing, so Average is the safe default. Re-adding a source resets these settings, so they're redone each time |
-| Oct 2026 | Google renamed Looker Studio to Data Studio; existing text keeps "Looker Studio" until the M5 README pass | One rename pass at the end instead of editing every issue now |
-| Oct 2026 | M4-07 becomes a recurring rebuild (first around December 20, then every ~55 days while the dashboard is shared); the demo video no longer waits for it; the project counts as finished when M5 is merged | Sandbox tables expire 60 days after they're written, so rebuilding early only moves the date by days, and a shared dashboard goes blank 60 days after the last rebuild. The tables are live now, so the video can be recorded on them. Milestone due dates stay as they are (December 20 and 31): they're deadlines, and finishing earlier needs no change |
-| Oct 2026 | Page 1 return-rate charts are tables (group, rate, people), with cross-filtering off | A table shows each rate next to its group size, as M4-04 asks, which a bar chart can't do clearly. Cross-filtering let one click filter the whole page to a single person |
-| Oct 2026 | Data Studio calculated fields are written down in docs/metrics.md section 5 | They live inside the embedded data source and are lost when it is removed and re-added, so the repo keeps the only permanent copy |
-| Oct 2026 | Page 2 reads two summary models, `fct_category_summary` and `fct_seller_summary` | Data Studio can't average review scores one per order from `fct_order_items`, because every item repeats its order's score. The models copy the tested queries in docs/metrics.md section 3 and store counts and sums, not finished rates, so Data Studio computes each rate as SUM / SUM and it stays correct in any grouping. The report now reads five mart tables |
-| Oct 2026 | The 30-order cut-off is an `in_rankings` column in the models | Data Studio settings are lost when a data source is re-added; a rule in the repo is tested and survives rebuilds |
-| Oct 2026 | Category `unknown` is left out of rankings (`in_rankings` = false) but kept in totals | It is 610 unlabeled products mixed together, not a category Olist can act on; the caption will give its order count |
-| Oct 2026 | Page 2 tables show `late_orders` (the count) next to the late-order rate | The highest rates belong to small sellers near the 30-order cut-off (for example 14 late orders, 32.56% of the 43 with a delivery date), while a seller with 1,806 orders at 9.71% has 172. Showing the count lets readers judge size; the ranking stays by rate, as M4-05 specifies |
-| Oct 2026 | `fct_order_items` removed from the report | No chart uses it, and it's one less source to rebuild. The summary models are built from it, and `docs/metrics.md` section 3 still queries it as the definition. Supersedes the M4-03 data-source row and 'the report now reads five mart tables' |
-| Oct 2026 | The M5-06 fresh-clone rebuild is also the first M4-07 rebuild, on December 18; M5 now finishes around December 18–20 | Both reload raw and run `dbt build`, so one run covers both, saving time and sandbox storage (never refunded). December 18 leaves a week before raw tables expire around December 25; if the README fails partway, the known commands still finish the rebuild in time. M4-07's expiry checks move into M5-06's Test. Milestone due dates stay as they are (December 20 and 31) |
-| Oct 2026 | Page 2 adds a top-10 "Sellers by late orders" table beside the ranking by rate, and the memo, README and page headline say the most late orders come from large sellers, not one seller | The seller caption's evidence (the large seller with 172 late orders) was several pages down the rate ranking, so readers couldn't check it. The new table also showed that several large sellers have many late orders (172, 124, 118, ...), so "concentrated in one large seller" overstated the finding. The ranking table stays by rate, as M4-05 specifies |
-| Oct 2026 | Rename pass done in M5-03: README and ROADMAP Sections 2, 3, 4 and 8 say "Data Studio" | The M4 issue texts, the M5-03 issue text and the decision log keep "Looker Studio" because they record what was true at the time. The code comment in dbt/dbt_project.yml is left for a later change, outside M5-03 |
+Grouped by the milestone each decision was made in, oldest first within each group. A decision that changed along the way has one row saying where it ended up. The earlier versions are in git history.
+
+### M1 Foundation
+
+| Decision | Why |
+|---|---|
+| Google Cloud (BigQuery), not AWS. | BigQuery has a permanent free tier with no credit card. The AWS free plan closes after 6 months. |
+| No Cloud Storage bucket. | It needs a billing account, and the data is small enough to load straight into BigQuery. |
+| A Python setup script instead of Terraform. | Terraform is built for managing large cloud setups, and this is one dataset. A script still rebuilds everything, with less to learn. |
+| Looker Studio for the dashboard, not Streamlit. | No stored keys and no hosting to maintain. |
+| GitHub Actions holds no cloud credentials. | Quality and secret checks run on every change, with no credential that could leak. |
+| The first commits went straight to `main`. | There was nothing to open a pull request against yet. The pull request rule applies from M1-02. |
+| `main` is protected by a ruleset, not classic branch protection. | A ruleset applies to admins too, because nobody is allowed to bypass it. |
+| Pull requests need 0 approvals. | It's a solo project, and GitHub doesn't let you approve your own pull request. |
+| Milestone due dates are the last day of each target period. | Section 8 gives rough targets like "late November", and GitHub needs an exact date. |
+| The project board is public. | Anyone can see how the work is tracked. It holds only issue titles and statuses. |
+| Python is pinned to 3.13 in `pyproject.toml`. | It's the newest version that dbt-core, dbt-bigquery and google-cloud-bigquery support. The pin can't live in `.python-version`, because `.gitignore` ignores that file. |
+| No service account key files. | Logins go through gcloud application-default login, so the repo has no key to leak. |
+| Dependabot security updates on from M1-05, when the first libraries arrived. | Off before that, since there was nothing to update. Dependabot only opens pull requests for known security holes, and those still go through protected `main`. |
+| pre-commit hooks are pinned to commit SHAs, not tags. | A tag can be moved to point at different code. A SHA, a commit's fixed ID, can't. The release version stays in a comment so a person can read it. |
+| GitHub Actions runs pre-commit itself, with its actions pinned to commit SHAs. | Local and CI checks share one setup, so they can't disagree. The SHAs are pinned for the same reason as the hooks. |
+| CI also runs a `gitleaks-history` hook that scans the full history. | The standard gitleaks hook scans only staged changes, and in CI there are none. This one runs only when called by name, with the same pinned version. |
+| `pre-commit` is a required check before anything merges into `main`. | Without it a red check is only a warning. Only the GitHub Actions app can report a pass. "Branch must be up to date" is off, since it's a solo project. |
+| Stay on the BigQuery sandbox, where tables expire after 60 days. | It's free with no billing. One command rebuilds everything, so a rebuild before any demo is enough. |
+| `.env` is read by `uv run --env-file`, not the python-dotenv library. | uv already reads env files, so that's one less library to pin and check. dbt-core 1.12 has installed python-dotenv since M3-01, but our code doesn't use it. |
+| The dataset delete asks first, and refuses if the dataset still holds tables. | It protects loaded data. BigQuery itself also refuses to delete a dataset that still has tables. |
+
+### M2 Ingestion
+
+| Decision | Why |
+|---|---|
+| Raw tables load every column as text (STRING). | The data stays exactly as delivered, leading zeros in zip codes included. Types are fixed in dbt staging. |
+| The loader replaces each raw table on every run. | Running it twice gives the same table, not duplicate rows. |
+| Olist data is never committed. | Its license is CC BY-NC-SA 4.0, and `data/` is gitignored. It was downloaded Oct 26, 2026. |
+
+### M3 Modeling
+
+| Decision | Why |
+|---|---|
+| dbt 1.12.x, with dbt-core and dbt-bigquery both pinned. | First planned as stable 1.x in M1. Version 2 is new, while 1.12 is supported until July 2027, past the project's end. Both package names now have v2 releases, so an unpinned install could pull it. |
+| No dbt packages, and every model is rebuilt in full. | The built-in tests are enough. The sandbox can't update tables in place, so there's no adding just the new rows. |
+| CI runs `dbt parse`, not `compile`. | `parse` checks the project without connecting to BigQuery, so CI needs no credentials. |
+| The sandbox's 10 GiB of storage is a lifetime budget. | Deleted data isn't refunded. So staging models are views, Reverse steps rebuild only what an issue touched, and raw data is reloaded only when needed. |
+| `profiles.yml` stays outside the repo, and `profiles.example.yml` is committed. | No connection details go into git, but a fresh clone can still be set up. |
+| All dbt models build into one dataset, `ecommerce_dbt` (US), separate from the raw data. | First planned as several dbt datasets, but one is enough at this size. It's in the same location as the raw data so joins work, and dropping it can never touch raw tables. |
+| `dim_customers.number_of_orders` counts orders of every status. | The mart stays a plain record of what people ordered. The dashboard can filter by status. |
+| `dim_customers.customer_state` is the state on the person's most recent order. | A person can order from more than one state, and the latest is where they are now. Ties go to `order_id`, so the result never changes between runs. |
+| `fct_orders` keeps item value, freight and payment total as separate columns. | They don't always add up, because of vouchers and installment fees. Combining them would hide real differences. |
+| An order with no items or no payments gets NULL, not 0. | A 0 would drag averages down. NULL means "no data" and is left out of averages. |
+| `fct_orders.review_score` is the order's most recent review. | 547 orders have more than one review. Keeping one per order stops duplicate rows, and ties go to `review_id` so the result stays the same between runs. |
+| `delivery_days` counts calendar days from purchase to delivery. | It's NULL when there's no delivery date, meaning "not delivered yet". 8 orders are marked delivered but have no delivery date, so they get NULL too. |
+| `is_late` means delivered after the estimated date. | It's also NULL with no delivery date, so an order with no delivery date counts as neither late nor on time. |
+| Reverse steps drop a single dbt table with `scripts/drop_table.py`. | It works only in `ecommerce_dbt`, refuses views and names with dots, and asks for the table name before deleting. It can't touch raw data or staging. |
+| `fct_order_items.product_category` falls back to the Portuguese name, then `'unknown'`. | Some categories have no English name and some products have no category at all (`docs/data-notes.md`, question 7). This way no item drops out of category totals. |
+| `fct_order_items` repeats the order's `is_late` and `review_score` on every item. | Item and seller analysis can filter by them. Averaged per item, multi-item orders would count more, so M4 averages them per order. |
+| Mart column descriptions are copied into BigQuery, for marts only. | They show in the BigQuery console and Looker Studio's field list, and use no storage. Staging views don't need them, since Looker Studio reads only marts. |
+| Full rebuilds delete the whole `ecommerce_dbt` dataset with `scripts/drop_dbt_dataset.py`. | The other delete scripts can't remove views or the dbt dataset. This one has several locks: it only deletes `ecommerce_dbt`, refuses anything not named `stg_`, `dim_` or `fct_`, and asks you to type the dataset name first. |
+| M3-08's Test and Reverse were one drop-and-rebuild. | Both are the same action, a build from an empty dataset, and deleted storage isn't refunded. Raw row counts before and after showed the raw data was untouched. |
+| Every script checks the project ID with `scripts/project_id.py` before connecting. | Google's library puts the ID into the web address as is, so a `/` or `?` could aim a delete at another table. One shared check means no script can skip it. |
+| `dbt parse` and the two script self-checks run as pre-commit hooks. | Local and CI checks share one setup. The required `pre-commit` check already covers them, so the rules protecting `main` didn't change. |
+| A placeholder dbt profile, `dbt/ci/profiles.yml`, is committed. | `dbt parse` needs a profile but never connects. This one holds only the made-up project ID `ci-dummy-project`, and `.gitignore` makes an exception for that one file. |
+| The real profile has no fallback project ID. | If `GCP_PROJECT_ID` is missing, dbt stops instead of guessing. No source or model reads it, so CI doesn't need it. |
+| CI Reverse test pull requests are made in the GitHub web editor. | The local hooks block committing a deliberate break, and hooks are never skipped. Web-editor commits don't run local hooks. |
+
+### M4 Dashboard
+
+| Decision | Why |
+|---|---|
+| Milestone 4 and 5 targets moved to December 2026. | M3 finished in late October, three months early. Finishing before the MS starts in January 2027, with a rebuild before tables expire around December 25, leaves slack. GitHub due dates are now December 20 and 31. |
+| The data ends 2018-08-21, so full follow-up means a first order by 2018-02-22. | Daily orders fall from about 277 to 1 in late August. A later end date would count people as followed up after the data stops recording them. 56,007 people have full follow-up. |
+| A return is a later order, within 180 days, that wasn't canceled or unavailable. | 897 of the 2,997 repeat customers placed their second order the same day as their first, and 66 only had canceled or unavailable later orders. Neither is a customer coming back. With these rules, 1,116 of 56,007 people returned (1.99%). |
+| People whose first order was canceled or unavailable stay in the comparison. | They're 900 people Olist lost at the first try. Leaving them out would only move the rate from 1.99% to 2.00%. |
+| Order value is the sum of item prices (`items_value`), without freight. | Page 2 splits value by category and seller, and only item prices can be split that way. Both pages then add up to the same total, 13,591,643.70. |
+| Money on canceled and unavailable orders uses `payment_total`, as one total. | 767 of the 1,234 orders (62.2%) have no items, so item prices would miss most of them and there's no category or seller to split by. Payments cover all of them: 269,735.11 BRL. Details in `docs/metrics.md`. |
+| The report uses the owner's data credentials and stays private until M5. | Viewers won't have BigQuery access, so their own credentials would show blank charts. The data is public and small, and queries stay well inside the sandbox's free 1 TB a month. |
+| Third-party chart plug-ins are off in the report. | No outside plug-in can read the data. |
+| Review scores and `delivery_days` default to Average. | Adding up scores or days means nothing. Re-adding a data source resets this and the plug-in setting, so both are redone each time. |
+| M4-07 repeats every ~55 days while the dashboard is shared, first around December 20. | Sandbox tables expire 60 days after they're written, so a shared dashboard goes blank 60 days after the last rebuild. Rebuilding early only moves that date by a few days. |
+| The demo video doesn't wait for M4-07, and the project ends when M5 merges. | The tables are live now, so the video can be recorded on them. Milestone due dates stay at December 20 and 31, since they're deadlines. |
+| Page 1 shows return rates as tables, with cross-filtering off. | A table puts each rate next to its group size, as M4-04 asks. With cross-filtering on, one click filtered the whole page to a single person. |
+| Data Studio calculated fields are written down in `docs/metrics.md` section 5. | They live inside the report's data source and are lost when it's re-added. The repo keeps the only permanent copy. |
+| Page 2 reads two summary models, `fct_category_summary` and `fct_seller_summary`. | Data Studio can't average review scores once per order from item rows. The models store counts and sums, so each rate is worked out from totals and stays right in any grouping. |
+| The 30-order cut-off is an `in_rankings` column in the models. | Report settings are lost when a data source is re-added. A rule in the repo is tested and survives rebuilds. |
+| Category `unknown` is left out of rankings but kept in totals. | It's 610 unlabeled products mixed together, not a category Olist can act on. The caption gives its order count. |
+| Page 2 tables show the late-order count next to the late-order rate. | The highest rates belong to small sellers, like one with 14 late orders. A seller with 1,806 orders at 9.71% has 172. The count shows size, and the ranking stays by rate. |
+| The report reads four marts: `dim_customers`, `fct_orders` and the two summary models. | M4-03 started with three, including `fct_order_items`. The summary models made five, then `fct_order_items` was removed because no chart used it. Each source is stored inside the report, so the report copies and rebuilds as one unit. |
+
+### M5 Delivery
+
+| Decision | Why |
+|---|---|
+| The M5-06 fresh-clone rebuild is also the first M4-07 rebuild, on December 18. | Both reload raw data and run `dbt build`, so one run covers both and saves storage. It leaves a week before raw tables expire around December 25, so the known commands can still finish if the README fails. |
+| Page 2 adds a top-10 "Sellers by late orders" table. | The caption's evidence, the large seller with 172 late orders, was pages down the rate ranking. Readers couldn't check it. |
+| The memo, README and headline say late orders come from several large sellers, not one. | The new table showed several large sellers with many late orders (172, 124, 118 and more). "Concentrated in one large seller" overstated it. |
+| The README and ROADMAP Sections 2, 3, 4 and 8 now say "Data Studio". | Google renamed Looker Studio during M4, and one pass in M5-03 changed the name. Older issue texts and this log keep "Looker Studio", since they record what was true then. |
 
 ## 15. Later (not in current scope)
 
