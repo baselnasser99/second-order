@@ -17,7 +17,7 @@ If a task doesn't help answer that question, it's out of scope.
 
 ## 2. How it works, in one paragraph
 
-Olist's raw sales data (CSV files) gets loaded by a Python script into BigQuery, Google's cloud database. dbt then cleans and reshapes that data into tidy tables, checking it with automated tests. Looker Studio reads those tidy tables and shows the results as a dashboard. A written memo explains what the numbers mean and what Olist should do. GitHub stores all the code, checks it automatically on every change, and tracks the work on a project board.
+Olist's raw sales data (CSV files) gets loaded by a Python script into BigQuery, Google's cloud database. dbt then cleans and reshapes that data into tidy tables, checking it with automated tests. Data Studio reads those tidy tables and shows the results as a dashboard. A written memo explains what the numbers mean and what Olist should do. GitHub stores all the code, checks it automatically on every change, and tracks the work on a project board.
 
 ## 3. Architecture
 
@@ -47,7 +47,7 @@ Around everything: GitHub repo · GitHub Actions checks · GitHub Projects board
 | Setup | Python setup script | Creates/deletes the dataset, so it can be rebuilt any time |
 | Ingestion | Python + `google-cloud-bigquery` | Loads CSVs into raw tables |
 | Transformation | dbt Core **1.12.x** (dbt-core and dbt-bigquery pinned; not v2) | Cleans data, builds tables, runs data tests |
-| Dashboard | Looker Studio | Charts for the findings; connects with your Google login, no keys |
+| Dashboard | Data Studio | Charts for the findings; connects with your Google login, no keys |
 | Automation | GitHub Actions | Lint and secret-scan every push; holds **no** cloud credentials |
 | Project management | GitHub Issues + Projects board | One issue per increment, tracked To do → Done |
 
@@ -94,7 +94,7 @@ Test: row counts in BigQuery match the CSVs. Reverse: drop all raw tables, reloa
 Test: `dbt build` passes (unique IDs, no empty keys, every order links to a customer). Reverse: drop all dbt tables, rebuild from nothing. Add dbt parse check to GitHub Actions (still no credentials).
 
 ### Milestone 4 — Analytics & Dashboard (≈ 15 hours · target: mid-December 2026)
-**Goal:** business metrics answering the question, shown in Looker Studio.
+**Goal:** business metrics answering the question, shown in Data Studio.
 Closes with M4-07, the first rebuild before the sandbox expiry around December 20; the rebuild then repeats every ~55 days while the dashboard is shared (see M4-07).
 Test: hand-check 2–3 numbers against raw data. Reverse: rebuild dashboard using only mart tables. Every chart has a one-sentence caption.
 
@@ -356,6 +356,8 @@ Test: expiry dates noted before the rebuild; counts 9/9; `dbt build` passes; the
 | Oct 2026 | Page 2 tables show `late_orders` (the count) next to the late-order rate | The highest rates belong to small sellers near the 30-order cut-off (for example 14 late orders, 32.56% of the 43 with a delivery date), while a seller with 1,806 orders at 9.71% has 172. Showing the count lets readers judge size; the ranking stays by rate, as M4-05 specifies |
 | Oct 2026 | `fct_order_items` removed from the report | No chart uses it, and it's one less source to rebuild. The summary models are built from it, and `docs/metrics.md` section 3 still queries it as the definition. Supersedes the M4-03 data-source row and 'the report now reads five mart tables' |
 | Oct 2026 | The M5-06 fresh-clone rebuild is also the first M4-07 rebuild, on December 18; M5 now finishes around December 18–20 | Both reload raw and run `dbt build`, so one run covers both, saving time and sandbox storage (never refunded). December 18 leaves a week before raw tables expire around December 25; if the README fails partway, the known commands still finish the rebuild in time. M4-07's expiry checks move into M5-06's Test. Milestone due dates stay as they are (December 20 and 31) |
+| Oct 2026 | Page 2 adds a top-10 "Sellers by late orders" table beside the ranking by rate, and the memo, README and page headline say the most late orders come from large sellers, not one seller | The seller caption's evidence (the large seller with 172 late orders) was several pages down the rate ranking, so readers couldn't check it. The new table also showed that several large sellers have many late orders (172, 124, 118, ...), so "concentrated in one large seller" overstated the finding. The ranking table stays by rate, as M4-05 specifies |
+| Oct 2026 | Rename pass done in M5-03: README and ROADMAP Sections 2, 3, 4 and 8 say "Data Studio" | The M4 issue texts, the M5-03 issue text and the decision log keep "Looker Studio" because they record what was true at the time. The code comment in dbt/dbt_project.yml is left for a later change, outside M5-03 |
 
 ## 15. Later (not in current scope)
 

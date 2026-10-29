@@ -290,6 +290,14 @@ Result: 16,008,872.12. Matches.
 
 ## 5. Data Studio setup
 
+### Design
+
+**Design:** Roboto font; accent color teal #0F766E (theme color, hero scorecards, bars); bars start at 0 with the number visible; on Customers, the two return-rate bar columns are sized to share one scale (~42px per point); table row numbers off; light grey (#F5F5F5) table headers; sort arrows hidden by sorting each table on a hidden chart-level field; tables show the top 10 rows with no paging; captions #666; one shared left edge (scorecard padding 8px). Canvas: report default 1200×1500; Customers custom 1200×590; Money custom 1200×1270.
+
+**Page headlines** (text boxes at the top of each page):
+- Customers: "Only about 3 in 100 customers ever order again", with the subtitle "Olist orders 2016–2018 · 96,096 people".
+- Money: "The most late orders come from large sellers, not the worst-rate small ones", with the subtitle "Olist orders 2016–2018 · 62 categories and 634 sellers with 30+ orders".
+
 ### Data Studio setup for page 1 ("Customers")
 
 The calculated fields below live inside the report's `dim_customers` data source. Removing and re-adding the data source deletes them, so re-enter them from here. Each one matches a metric in section 1.
@@ -309,7 +317,7 @@ Data source settings: owner's credentials, community visualizations off, `first_
 #### Page 1 charts
 
 - Scorecards: "People" (Record Count, 96,096), "Repeat customers" (2,997), "Repeat rate" (3.12%).
-- Return rate by first-order timing: a table with `first_order_timing` ("First order"), `return_rate_180d` ("180-day return rate") and `people_full_followup` ("People"), sorted by `return_rate_180d` descending. Filter "Full follow-up, has timing": include `has_full_followup` = true AND exclude `first_order_timing` is null. Result: on time 2.02% (50,681 people), late 1.69% (3,317).
+- Return rate by first-order timing: a table with `first_order_timing` ("First order"), `return_rate_180d` ("180-day return rate") and `people_full_followup` ("People"), sorted by Record Count descending (not shown in the table, so no sort arrow appears; it puts the larger group, On time, first). Filter "Full follow-up, has timing": include `has_full_followup` = true AND exclude `first_order_timing` is null. Result: on time 2.02% (50,681 people), late 1.69% (3,317).
 - Return rate by first-order review score: the same table with `first_order_review_score` ("First-order review (1–5)"), `return_rate_180d` ("180-day return rate") and `people_full_followup` ("People"), sorted ascending. Filter "Full follow-up, has review": include `has_full_followup` = true AND exclude `first_order_review_score` is null. Results: 1 = 1.68% (6,544), 2 = 1.53% (1,832), 3 = 1.98% (4,800), 4 = 1.84% (10,913), 5 = 2.15% (31,437).
 - Cross-filtering is off on both tables, so clicking a row doesn't filter the whole page.
 
@@ -328,11 +336,14 @@ The calculated fields below are the same on both summary sources. Removing and r
 
 #### Page 2 charts
 
-- Category table on `fct_category_summary`: dimension `product_category` ("Category"); metrics `orders` ("Orders"), `late_order_rate` ("Late-order rate", Percent, 2 decimals), `late_orders` ("Late orders"), `average_review` ("Avg review", Number, 2 decimals), `order_value` ("Order value (BRL)", Number, 2 decimals). Filter "In rankings": include `in_rankings` = true. Sort: `late_order_rate` descending. Cross-filtering off.
-- Seller table on `fct_seller_summary`: the same, with `seller_id` ("Seller ID") as the dimension and its own filter "In rankings (sellers)": include `in_rankings` = true. Filters belong to one data source, so each table needs its own.
-- Scorecard on `fct_orders`, labelled "Payments on canceled and unavailable orders (BRL)": Sum of `payment_total`, Number, 2 decimals. Filter "Canceled or unavailable": include `order_status` in canceled, unavailable (section 2, payments on canceled and unavailable orders).
+- Scorecard on `fct_orders`, labelled "At-risk payments (BRL)" (the full name made the number too small; the caption says what it counts): Sum of `payment_total`, Number, 2 decimals, number in teal. Filter "Canceled or unavailable": include `order_status` in canceled, unavailable (section 2, payments on canceled and unavailable orders).
+- Category table on `fct_category_summary`: dimension "Category", a chart-level field with the formula `REPLACE(product_category, "_", " ")`; metrics `orders` ("Orders"), `late_order_rate` ("Late-order rate", Percent, 2 decimals, shown as bars), `late_orders` ("Late orders"), `average_review` ("Avg review", Number, 2 decimals), `order_value` ("Order value (BRL)", Number, 0 decimals). Filter "In rankings": include `in_rankings` = true. Sort: a hidden chart-level field `late_order_rate * 1`, descending. Top 10 rows. Cross-filtering off.
+- Sellers by rate table on `fct_seller_summary`: the same metrics, with `seller_id` ("Seller ID", column narrowed so IDs show about 10 characters) as the dimension and its own filter "In rankings (sellers)": include `in_rankings` = true. Filters belong to one data source, so each table needs its own. Sort: a hidden chart-level field `late_order_rate * 1`, descending. Top 10 rows. Cross-filtering off.
+- Sellers by late orders table on `fct_seller_summary`: dimension `seller_id` ("Seller ID", narrowed the same way); metrics `orders` ("Orders"), `late_order_rate` ("Late-order rate", Percent, 2 decimals), `late_orders` ("Late orders", shown as bars). Filter "In rankings (sellers)". Sort: a hidden chart-level field `SUM(late_orders)`, descending. Top 10 rows. Cross-filtering off. It shows the evidence for the seller caption: the large seller with 172 late orders.
 
-Hand-checked against direct SQL on Oct 28, 2026, all matching: `bed_bath_table` 9,417 orders, 7.43% late, 3.97 average review, 1,036,988.68 order value; seller `6560211a19b47992c3666cc44a7e94c0` 1,854 orders, 5.28%, 3.94, 123,304.83; scorecard 269,735.11.
+Chart-level fields (Data Studio IDs starting `qt_`) belong to their chart, not the data source, so re-adding a source doesn't delete them. But they refer to source fields by name, so if a source is re-added and its field names change, they break. All four are listed above with their formulas so they can be re-created: "Category" and the hidden sort on the Category table, and the hidden sorts on both seller tables.
+
+Hand-checked against direct SQL on Oct 28, 2026, all matching: `bed_bath_table` 9,417 orders, 7.43% late, 3.97 average review, 1,036,988.68 order value (the table shows it rounded to 1,036,989); seller `6560211a19b47992c3666cc44a7e94c0` 1,854 orders, 5.28%, 3.94, 123,304.83; scorecard 269,735.11.
 
 The M4-06 Reverse step rebuilt a copy of the report from mart tables only on Oct 29, 2026, and every chart matched.
 
@@ -351,6 +362,7 @@ Captions live inside the report and are lost with it, so this is the permanent c
 | Customers | Repeat rate | Only about 3 in every 100 people ever placed a second order. |
 | Customers | Return rate by first-order timing | People whose first order arrived late returned within 180 days slightly less often (1.69% of 3,317 people vs 2.02% of 50,681), but both groups sit near 2%, so delivery timing alone doesn't explain why customers don't come back. |
 | Customers | Return rate by first-order review score | Whatever score people gave their first order, from 1 to 5, only 1.5–2.2% came back within 180 days, so even happy first-time customers rarely return. |
-| Money | Payments scorecard | Customers paid 269,735.11 BRL on 1,234 orders that were canceled or unavailable; the data doesn't show refunds, so this is money at risk, not a confirmed loss. |
+| Money | At-risk payments scorecard | Customers paid 269,735.11 BRL on 1,234 orders that were canceled or unavailable; the data doesn't show refunds, so this is money at risk, not a confirmed loss. |
 | Money | Category table | Categories with 30+ orders, ranked by late-order rate (a high rate on a small category can mean just a few late orders); items with no category ("unknown", 1,451 orders) count in totals but not in this ranking. |
-| Money | Seller table | The highest late rates belong to small sellers (the top one has 14 late orders), while one large seller at 9.71% has 172, more than the 10 highest-rate sellers combined (140). |
+| Money | Sellers by rate table | The highest late rates belong to small sellers (the top one has 14 late orders), while one large seller at 9.71% has 172, more than the 10 highest-rate sellers combined (140). |
+| Money | Sellers by late orders table | Ranked by late orders instead, one large seller (4a3ca931, 1,806 orders) tops the list with 172 late orders at a 9.71% rate. |
