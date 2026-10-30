@@ -1,5 +1,7 @@
 # Metric definitions (M4-02)
 
+This file is for anyone who wants to check a number on the dashboard, in the memo or in the README, or rebuild the dashboard by hand.
+
 Every number on the dashboard, in plain words, with the mart table and columns it uses and the SQL that produces it. The dashboard uses these definitions; if a chart and this file disagree, this file is right and the chart needs fixing.
 
 Every query below was run as written on Oct 28, 2026; the results are from that run.
