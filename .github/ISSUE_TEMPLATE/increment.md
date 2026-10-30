@@ -6,7 +6,7 @@ labels: []
 assignees: []
 ---
 
-<!-- What this increment builds, how it is tested, and how it is reversed. See ROADMAP.md Section 9. -->
+<!-- What this increment builds, how it is tested, and how it is reversed. See docs/ROADMAP.md Section 9. -->
 
 - [ ] Build
 - [ ] Test

@@ -1,5 +1,7 @@
 # Raw data notes (M3-02)
 
+This file records what the raw Olist data really looked like before any cleaning, for anyone who wants to know why the cleaning steps work the way they do.
+
 What the 9 raw tables in `ecommerce_analytics` actually contain, checked before writing any dbt staging model. Every column was loaded as STRING (text), so these checks look at the text as delivered.
 
 The exact text of all 27 queries is in [data-notes-queries.sql](data-notes-queries.sql), numbered to match the questions below. All are read-only `SELECT`s. Results are from the data loaded on Oct 26, 2026.
