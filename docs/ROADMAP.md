@@ -1,8 +1,8 @@
 # Second Order — Blueprint & Roadmap
 
-*Why Olist customers never come back: a cloud data pipeline on BigQuery and dbt.*
+*Why Olist customers don't come back*
 
-**Owner:** Basel Nasser · **Started:** October 2026 · **Target finish:** March 2027 (before co-op applications)
+**Owner:** Basel Nasser · **Started:** October 2026 · **Target finish:** December 2026
 **Time budget:** ~4 hours/week · **Estimated total:** ~65 hours
 
 This file is the single source of truth for the project and lives in the GitHub repo. All work follows it. If something changes, update this file first.
@@ -250,7 +250,7 @@ A one-sentence caption on every chart: what it shows and the main takeaway. Ever
 Test: every chart has a caption; the report's data source list shows only mart tables. Reverse: make a copy of the report, remove its data sources, add back only the mart tables; every chart still works. Delete the copy.
 
 **M4-07 · Rebuild before each sandbox expiry (first around December 20)**
-Raw tables expire around December 25 and dbt tables about a day later. Check each table's expiration date in the BigQuery console first. Then reload raw with `scripts/load.py`, run `dbt build` and run `scripts/check_counts.py`. Check the expiration dates again: if replacing a table's data doesn't reset its expiry, find another way before the old date passes. This is also the first real run of `load.py` with the M3-10 project ID check. After the first run, repeat this every ~55 days for as long as the dashboard is shared (co-op applications run through about August 2027), and set a calendar reminder for the next date each time. The issue closes after the first run; later runs need no new issue unless something breaks.
+Raw tables expire around December 25 and dbt tables about a day later. Check each table's expiration date in the BigQuery console first. Then reload raw with `scripts/load.py`, run `dbt build` and run `scripts/check_counts.py`. Check the expiration dates again: if replacing a table's data doesn't reset its expiry, find another way before the old date passes. This is also the first real run of `load.py` with the M3-10 project ID check. After the first run, repeat this every ~55 days for as long as the dashboard is shared (planned through about August 2027), and set a calendar reminder for the next date each time. The issue closes after the first run; later runs need no new issue unless something breaks.
 Test: counts 9/9, `dbt build` passes, the dashboard headline is unchanged, and the new expiry dates are in late February 2027. Reverse: n/a.
 
 ---
@@ -280,7 +280,7 @@ Write the script first: the finding (20 seconds), a walk through both dashboard 
 Test: the video is under 2:00; watch it through once only to check for personal details. Reverse: n/a.
 
 **M5-06 · Fresh-clone rebuild from the README (December 18, also the first M4-07 rebuild)**
-First, check every table's expiration date in the BigQuery console and write them down. Then clone the repo into a new folder outside `second-order` and follow only the README to set up and rebuild: environment, `.env`, `profiles.yml` from the example, load raw with `scripts/load.py`, `dbt build`, `scripts/check_counts.py`. This is also the first real run of `load.py` with the M3-10 project ID check. Write down every step where you had to guess or use something the README doesn't say. Fix the README from your usual `second-order` folder, not the fresh clone, because the clone has no local excludes or `commit-msg` hook. Delete the fresh clone afterwards, since it holds a `.env`. Check the expiration dates again: if replacing a table's data didn't reset its expiry, find another way before the old date passes (raw around December 25, dbt a day later). Set a calendar reminder for the next rebuild, about 55 days later (around February 11, 2027). Close M4-07 and M5-06 together.
+First, check every table's expiration date in the BigQuery console and write them down. Then clone the repo into a new folder outside `second-order` and follow only the README to set up and rebuild: environment, `.env`, `profiles.yml` from the example, load raw with `scripts/load.py`, `dbt build`, `scripts/check_counts.py`. This is also the first real run of `load.py` with the M3-10 project ID check. Write down every step where you had to guess or use something the README doesn't say. Fix the README from your usual `second-order` folder, not the fresh clone, because the clone has no local excludes or `commit-msg` hook. Delete the fresh clone afterwards, since it holds a `.env`. Check the expiration dates again: if replacing a table's data didn't reset its expiry, find another way before the old date passes (raw around December 25, dbt a day later). Set a calendar reminder for the next rebuild, about 55 days later (around February 11, 2027). Close M4-07 and M5-06 together. Update the M4 and M5 lines in `docs/how-it-was-built.md` with their actual finish dates.
 Test: expiry dates noted before the rebuild; counts 9/9; `dbt build` passes; the dashboard headline is unchanged; the new expiry dates are in late February 2027. Reverse: this issue is itself the M5 Reverse step.
 
 **M5-07 · Tidy the decision log**
@@ -408,6 +408,8 @@ Grouped by the milestone each decision was made in, oldest first within each gro
 | M5 adds M5-11, a scorecard restyle, before the demo video. | The scorecards are the first thing a visitor sees on the dashboard and in the video. The work order is now M5-10, M5-11, M5-09, M5-05, then M5-06 on December 18. |
 | The dashboard has no dark version. | Data Studio can't switch themes for a viewer, so dark mode would mean a second report to rebuild and keep matching after every sandbox expiry. Light is the usual choice for dashboards. |
 | Scorecard labels are separate text boxes, and the cards use a fixed 48px number. | Data Studio sizes a scorecard's own label with its number, so the label was as large as the number. A separate 14px label lets the number lead, and a fixed size keeps all four numbers the same size. |
+| ROADMAP.md moved to `docs/ROADMAP.md`, and `docs/how-it-was-built.md` sums up the build on one page. | A visitor should meet the finding, not the plan. The move was a commit of its own, merged with a merge commit rather than a squash, so git keeps the file's history. M5-06 adds the actual M4 and M5 finish dates to the page. |
+| M5-10 was done by hand on GitHub, with no pull request. | It changed only GitHub settings: milestone summaries, the board's default view, the About section and the profile pin. No files changed, so this row is its record. |
 
 ## 15. Later (not in current scope)
 
