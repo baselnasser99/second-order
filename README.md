@@ -1,28 +1,44 @@
 # Second Order
 
-*Why Olist customers never come back: a cloud data pipeline on BigQuery and dbt.*
+*Why Olist customers don't come back*
 
-**Only about 3 in 100 Olist customers ever place a second order, and that barely changes whether their first order arrived late or on time, or got 1 star or 5.**
+I wanted to know where Olist, a Brazilian online marketplace, loses customers and money, and what it should fix first. Only about 3 in 100 people ever placed a second order (2,997 of 96,096), and among people I could follow for 180 days, about 2 in 100 came back whether their first order arrived late or on time. Olist should first test ways to win that second order, starting from today's 180-day return rate of 1.99%.
 
 **[Open the live dashboard](https://datastudio.google.com/reporting/141992e1-ccfd-4563-8066-0bb982a5971b)** (view-only, no sign-in needed)
 
-I built a cloud data pipeline (Python, BigQuery, dbt) that turns Olist's public sales data into tested tables, and a two-page Data Studio (formerly Looker Studio) dashboard that shows where the marketplace loses customers and money.
-
-![The Customers page of the Second Order dashboard](docs/images/customers-page.png)
-
-## The question
-
-Olist, a Brazilian online marketplace, wants to know where it is losing customers and money, and what to fix first.
+```mermaid
+pie title 96,096 people who ordered from Olist
+    "Ordered once (93,099)" : 93099
+    "Ordered again (2,997)" : 2997
+```
 
 ## What I found
 
 **Customers rarely come back, whatever their first experience.** Of 96,096 people, only 2,997 (3.12%) ever placed a second order. Among people followed for a full 180 days, about 2% came back, whether their first order arrived late (1.69%) or on time (2.02%), and whatever review score they gave it.
 
-**The most late orders come from large sellers.** The sellers with the highest late rates are small (the top one has 14 late orders), while one large seller at 9.71% has 172, more than the 10 highest-rate sellers combined.
+**The sellers with the most late orders are large ones, not the small sellers with the highest late rates.** One large seller at 9.71% has 172 late orders, more than the 10 highest-rate sellers combined (140).
 
 **Customers paid 269,735.11 BRL on 1,234 canceled or unavailable orders.** The data has no refunds, so this is money at risk, not a confirmed loss.
 
-The [memo](docs/memo.md) sets out what Olist should fix first.
+## What Olist should do first
+
+**1. Test ways to win the second order.** For example, offer a follow-up deal to half of new customers and compare their 180-day return rate with the other half's. Today's rate, 1.99%, is the baseline.
+
+**2. Start delivery work with the sellers that have the most late orders.** The top one alone has more late orders than the 10 highest-rate sellers combined (172 vs 140), so Olist should track the number of late orders as well as the rate.
+
+**3. Find out what happened to the 269,735.11 BRL.** Check refund records for the 1,234 canceled and unavailable orders, starting with the 603 unavailable orders that have no items.
+
+The [memo](docs/memo.md) has the full version.
+
+## The dashboard
+
+![The Customers page of the Second Order dashboard](docs/images/customers-page.png)
+
+*The Customers page: of 96,096 people, only 2,997 ordered again, and the 180-day return rate stays near 2% whether the first order was late or on time, and whatever review score it got.*
+
+![The Money page of the Second Order dashboard](docs/images/money-page.png)
+
+*The Money page: 269,735.11 BRL paid on canceled or unavailable orders, which is money at risk, not a confirmed loss, and late-order rankings for categories and sellers.*
 
 ## How it works
 
@@ -47,7 +63,14 @@ flowchart TD
     REPO -.->|"holds the code"| DBT
 ```
 
-## Decisions worth noting
+## Limits
+
+- The data covers 2016 to 2018-08-21. It shows patterns, not causes.
+- It has no refunds, so payments on canceled orders can't be called losses.
+- It has no seller names, only seller ID codes.
+
+<details>
+<summary><strong>Decisions worth noting</strong></summary>
 
 - **No cloud credentials in GitHub.** The automated checks, including a dbt parse of every model, run without any access to BigQuery, so there's nothing to leak.
 - **Every dashboard number has a written definition.** [docs/metrics.md](docs/metrics.md) gives each metric in plain words with its SQL, and three were checked against the raw data by hand.
@@ -57,13 +80,10 @@ flowchart TD
 - **"Money at risk", not "loss".** Without refund records, payments on canceled orders can't honestly be called losses.
 - **Rankings need 30 orders.** A seller with 2 bad orders can't top the list.
 
-## Limits
+</details>
 
-- The data covers 2016 to 2018-08-21. It shows patterns, not causes.
-- It has no refunds, so payments on canceled orders can't be called losses.
-- It has no seller names, only seller ID codes.
-
-## Run it yourself
+<details>
+<summary><strong>Run it yourself</strong></summary>
 
 This rebuilds every table in your own free BigQuery sandbox. Run every command from the repo's root folder.
 
@@ -127,6 +147,8 @@ This rebuilds every table in your own free BigQuery sandbox. Run every command f
     ```
 
 14. **Build the dashboard (by hand).** No script builds the dashboard. [docs/metrics.md](docs/metrics.md) section 5 lists every data source, chart, filter, label and caption, so you can rebuild it in Data Studio on your own `ecommerce_dbt` tables.
+
+</details>
 
 ## Data and license
 
