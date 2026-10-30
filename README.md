@@ -9,6 +9,7 @@ I wanted to know where Olist, a Brazilian online marketplace, loses customers an
 I built a data pipeline and this two-page dashboard to answer it.
 
 ```mermaid
+%%{init: {"themeVariables": {"pie1": "#9CA3AF", "pie2": "#0D9488"}}}%%
 pie title 96,096 people who ordered from Olist
     "Ordered once (93,099)" : 93099
     "Ordered again (2,997)" : 2997
