@@ -6,6 +6,8 @@ I wanted to know where Olist, a Brazilian online marketplace, loses customers an
 
 **[Open the live dashboard](https://datastudio.google.com/reporting/141992e1-ccfd-4563-8066-0bb982a5971b)** (view-only, no sign-in needed)
 
+I built a data pipeline and this two-page dashboard to answer it.
+
 ```mermaid
 pie title 96,096 people who ordered from Olist
     "Ordered once (93,099)" : 93099
@@ -16,7 +18,7 @@ pie title 96,096 people who ordered from Olist
 
 **Customers rarely come back, whatever their first experience.** Of 96,096 people, only 2,997 (3.12%) ever placed a second order. Among people followed for a full 180 days, about 2% came back, whether their first order arrived late (1.69%) or on time (2.02%), and whatever review score they gave it.
 
-**The sellers with the most late orders are large ones, not the small sellers with the highest late rates.** One large seller at 9.71% has 172 late orders, more than the 10 highest-rate sellers combined (140).
+**The sellers with the most late orders are large ones, not the small sellers with the highest late rates (the top one has 14 late orders).** One large seller at 9.71% has 172 late orders, more than the 10 highest-rate sellers combined (140).
 
 **Customers paid 269,735.11 BRL on 1,234 canceled or unavailable orders.** The data has no refunds, so this is money at risk, not a confirmed loss.
 
