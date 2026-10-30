@@ -399,6 +399,7 @@ Grouped by the milestone each decision was made in, oldest first within each gro
 | The memo, README and headline say late orders come from several large sellers, not one. | The new table showed several large sellers with many late orders (172, 124, 118 and more). "Concentrated in one large seller" overstated it. |
 | The README and ROADMAP Sections 2, 3, 4 and 8 now say "Data Studio". | Google renamed Looker Studio during M4, and one pass in M5-03 changed the name. Older issue texts and this log keep "Looker Studio", since they record what was true then. |
 | M5 adds M5-08 to M5-10 so visitors see the finding before the process. | The front page led with the plan and the checks, so a visitor met the process before the result. The work order is M5-04, M5-08, M5-10, M5-09, M5-05, then M5-06 on December 18. |
+| The dashboard is shared view-only with anyone who has the link. | Nobody gets edit access, and viewers can't download, print, copy, create alerts or make Slides from it. The report uses the owner's credentials, so viewers' chart queries count against the owner's free 1 TB a month; the data is small, so this stays well inside it. |
 
 ## 15. Later (not in current scope)
 
