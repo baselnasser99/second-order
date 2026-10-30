@@ -38,6 +38,8 @@ FROM `ecommerce_dbt.dim_customers`
 
 Result: 2,997.
 
+People who ordered only once: 96,096 people minus 2,997 repeat customers = 93,099 (96.88%, about 97 in 100).
+
 ### Repeat rate
 
 Repeat customers divided by all people.
