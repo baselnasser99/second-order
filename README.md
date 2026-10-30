@@ -4,6 +4,8 @@
 
 **Only about 3 in 100 Olist customers ever place a second order, and that barely changes whether their first order arrived late or on time, or got 1 star or 5.**
 
+**[Open the live dashboard](https://datastudio.google.com/reporting/141992e1-ccfd-4563-8066-0bb982a5971b)** (view-only, no sign-in needed)
+
 I built a cloud data pipeline (Python, BigQuery, dbt) that turns Olist's public sales data into tested tables, and a two-page Data Studio (formerly Looker Studio) dashboard that shows where the marketplace loses customers and money.
 
 ![The Customers page of the Second Order dashboard](docs/images/customers-page.png)
