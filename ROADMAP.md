@@ -407,6 +407,7 @@ Grouped by the milestone each decision was made in, oldest first within each gro
 | The README opens with the finding: the summary, the dashboard link and a pie chart come first, and "Decisions worth noting" and "Run it yourself" fold into `<details>` sections near the end. | A visitor with 20 seconds should meet the result before the process. M5-03's order put the findings first but still left the decisions and setup open on the page. |
 | M5 adds M5-11, a scorecard restyle, before the demo video. | The scorecards are the first thing a visitor sees on the dashboard and in the video. The work order is now M5-10, M5-11, M5-09, M5-05, then M5-06 on December 18. |
 | The dashboard has no dark version. | Data Studio can't switch themes for a viewer, so dark mode would mean a second report to rebuild and keep matching after every sandbox expiry. Light is the usual choice for dashboards. |
+| Scorecard labels are separate text boxes, and the cards use a fixed 48px number. | Data Studio sizes a scorecard's own label with its number, so the label was as large as the number. A separate 14px label lets the number lead, and a fixed size keeps all four numbers the same size. |
 
 ## 15. Later (not in current scope)
 

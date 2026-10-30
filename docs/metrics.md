@@ -294,7 +294,17 @@ Result: 16,008,872.12. Matches.
 
 ### Design
 
-**Design:** Roboto font; accent color teal #0F766E (theme color, hero scorecards, bars); bars start at 0 with the number visible; on Customers, the two return-rate bar columns are sized to share one scale (~42px per point); table row numbers off; light grey (#F5F5F5) table headers; sort arrows hidden by sorting each table on a hidden chart-level field; tables show the top 10 rows with no paging; captions #666; one shared left edge (scorecard padding 8px). Canvas: report default 1200×1500; Customers custom 1200×590; Money custom 1200×1270.
+**Design:** Roboto font; accent color teal #0F766E (theme color, hero scorecards, bars); bars start at 0 with the number visible; on Customers, the two return-rate bar columns are sized to share one scale (~42px per point); table row numbers off; light grey (#F5F5F5) table headers; sort arrows hidden by sorting each table on a hidden chart-level field; tables show the top 10 rows with no paging; captions #666; one shared left edge (scorecard left padding 8px, with each label's first letter lined up on its number's first digit). Canvas: report default 1200×1500; Customers custom 1200×565; Money custom 1200×1247. The README screenshots are full-canvas captures at device pixel ratio 2 (2400×1130 and 2400×2494), so future screenshots can be checked against those sizes.
+
+**Scorecards** (all four): "Hide field name" on; number font size 48px; padding top 32px, left 8px, right 16px; border radius 8; shadow off; Compact numbers off.
+- People and Repeat customers: background #FFFFFF, border #E5E7EB 1px, number #1F2937.
+- Repeat rate and At-risk payments: background #F0FDFA, border #99D5CC 1px, number #0F766E.
+
+**Scorecard labels** are separate text boxes, because Data Studio sizes a scorecard's own label together with its number. Each is Roboto 14px, transparent background, 200×25, 11px below the card's top and 2px from the card's left edge (3px for At-risk payments, because "A" has no space before it), so each label's first letter lines up with the number's first digit. They sit on top of the cards. Text "People", "Repeat customers", "Repeat rate" and "At-risk payments (BRL)"; color #666666 for the first two, #0F766E for the last two.
+
+**Positions:**
+- Customers: cards at y 124, 101px tall; captions at y 232; tables at y 304; lower captions at y 390 and 475; page 1200×565.
+- Money: card at y 122, 100px tall; caption at y 233; Categories heading y 319; category table y 369, its caption y 704; Sellers heading y 779; seller tables y 819; bottom captions y 1154; page 1200×1247.
 
 **Page headlines** (text boxes at the top of each page):
 - Customers: "Only about 3 in 100 customers ever order again", with the subtitle "Olist orders 2016–2018 · 96,096 people".
@@ -351,7 +361,7 @@ The M4-06 Reverse step rebuilt a copy of the report from mart tables only on Oct
 
 ### Rebuilding a data source
 
-After a data source is removed and re-added, charts can swap in other fields (for example `number_of_orders` or Record Count), lose their filters (shown as a pink broken filter) and lose their labels, so check every chip against this section. If a chart can't find the new source's fields, switch its data source to another one and back. Re-add the source and its calculated fields before reconnecting charts. "Make a copy" once failed with an `errorStatus` code 3 page; closing the browser and trying again worked.
+After a data source is removed and re-added, charts can swap in other fields (for example `number_of_orders` or Record Count), lose their filters (shown as a pink broken filter) and lose their labels, so check every chip against this section. If a chart can't find the new source's fields, switch its data source to another one and back. Re-add the source and its calculated fields before reconnecting charts. "Make a copy" once failed with an `errorStatus` code 3 page; closing the browser and trying again worked. The scorecard label text boxes aren't part of any data source, so re-adding a source doesn't remove them, but they must be moved with their cards.
 
 ### Captions
 
