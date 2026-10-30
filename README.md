@@ -66,6 +66,8 @@ flowchart TD
     REPO -.->|"holds the code"| DBT
 ```
 
+[How it was built](docs/how-it-was-built.md) covers each milestone: what was planned, decided and checked.
+
 ## Limits
 
 - The data covers 2016 to 2018-08-21. It shows patterns, not causes.
