@@ -294,7 +294,17 @@ Result: 16,008,872.12. Matches.
 
 ### Design
 
-**Design:** Roboto font; accent color teal #0F766E (theme color, hero scorecards, bars); bars start at 0 with the number visible; on Customers, the two return-rate bar columns are sized to share one scale (~42px per point); table row numbers off; light grey (#F5F5F5) table headers; sort arrows hidden by sorting each table on a hidden chart-level field; tables show the top 10 rows with no paging; captions #666; one shared left edge (scorecard padding 8px). Canvas: report default 1200×1500; Customers custom 1200×590; Money custom 1200×1270.
+**Design:** Roboto font; accent color teal #0F766E (theme color, hero scorecards, bars); bars start at 0 with the number visible; on Customers, the two return-rate bar columns are sized to share one scale (~42px per point); table row numbers off; light grey (#F5F5F5) table headers; sort arrows hidden by sorting each table on a hidden chart-level field; tables show the top 10 rows with no paging; captions #666; one shared left edge (scorecard left padding 8px, with each label's first letter lined up on its number's first digit). Canvas: report default 1200×1500; Customers custom 1200×565; Money custom 1200×1247. The README screenshots are full-canvas captures at device pixel ratio 2 (2400×1130 and 2400×2494), so future screenshots can be checked against those sizes.
+
+**Scorecards** (all four): "Hide field name" on; number font size 48px; padding top 32px, left 8px, right 16px; border radius 8; shadow off; Compact numbers off.
+- People and Repeat customers: background #FFFFFF, border #E5E7EB 1px, number #1F2937.
+- Repeat rate and At-risk payments: background #F0FDFA, border #99D5CC 1px, number #0F766E.
+
+**Scorecard labels** are separate text boxes, because Data Studio sizes a scorecard's own label together with its number. Each is Roboto 14px, transparent background, 200×25, 11px below the card's top and 2px from the card's left edge (3px for At-risk payments, because "A" has no space before it), so each label's first letter lines up with the number's first digit. They sit on top of the cards. Text "People", "Repeat customers", "Repeat rate" and "At-risk payments (BRL)"; color #666666 for the first two, #0F766E for the last two.
+
+**Positions:**
+- Customers: cards at y 124, 101px tall; captions at y 232; tables at y 304; lower captions at y 390 and 475; page 1200×565.
+- Money: card at y 122, 100px tall; caption at y 233; Categories heading y 319; category table y 369, its caption y 704; Sellers heading y 779; seller tables y 819; bottom captions y 1154; page 1200×1247.
 
 **Page headlines** (text boxes at the top of each page):
 - Customers: "Only about 3 in 100 customers ever order again", with the subtitle "Olist orders 2016–2018 · 96,096 people".
@@ -318,7 +328,7 @@ Data source settings: owner's credentials, community visualizations off, `first_
 
 #### Page 1 charts
 
-- Scorecards: "People" (Record Count, 96,096), "Repeat customers" (2,997), "Repeat rate" (3.12%).
+- Scorecards: "People" (Record Count, 96,096), "Repeat customers" (2,997), "Repeat rate" (3.12%). Their labels are separate text boxes (see Scorecard labels under Design).
 - Return rate by first-order timing: a table with `first_order_timing` ("First order"), `return_rate_180d` ("180-day return rate") and `people_full_followup` ("People"), sorted by Record Count descending (not shown in the table, so no sort arrow appears; it puts the larger group, On time, first). Filter "Full follow-up, has timing": include `has_full_followup` = true AND exclude `first_order_timing` is null. Result: on time 2.02% (50,681 people), late 1.69% (3,317).
 - Return rate by first-order review score: the same table with `first_order_review_score` ("First-order review (1–5)"), `return_rate_180d` ("180-day return rate") and `people_full_followup` ("People"), sorted ascending. Filter "Full follow-up, has review": include `has_full_followup` = true AND exclude `first_order_review_score` is null. Results: 1 = 1.68% (6,544), 2 = 1.53% (1,832), 3 = 1.98% (4,800), 4 = 1.84% (10,913), 5 = 2.15% (31,437).
 - Cross-filtering is off on both tables, so clicking a row doesn't filter the whole page.
@@ -338,7 +348,7 @@ The calculated fields below are the same on both summary sources. Removing and r
 
 #### Page 2 charts
 
-- Scorecard on `fct_orders`, labelled "At-risk payments (BRL)" (the full name made the number too small; the caption says what it counts): Sum of `payment_total`, Number, 2 decimals, number in teal. Filter "Canceled or unavailable": include `order_status` in canceled, unavailable (section 2, payments on canceled and unavailable orders).
+- Scorecard on `fct_orders`, with its field name hidden and a separate label text box, "At-risk payments (BRL)" (see Scorecard labels under Design; the caption says what it counts): Sum of `payment_total`, Number, 2 decimals, number in teal. Filter "Canceled or unavailable": include `order_status` in canceled, unavailable (section 2, payments on canceled and unavailable orders).
 - Category table on `fct_category_summary`: dimension "Category", a chart-level field with the formula `REPLACE(product_category, "_", " ")`; metrics `orders` ("Orders"), `late_order_rate` ("Late-order rate", Percent, 2 decimals, shown as bars), `late_orders` ("Late orders"), `average_review` ("Avg review", Number, 2 decimals), `order_value` ("Order value (BRL)", Number, 0 decimals). Filter "In rankings": include `in_rankings` = true. Sort: a hidden chart-level field `late_order_rate * 1`, descending. Top 10 rows. Cross-filtering off.
 - Sellers by rate table on `fct_seller_summary`: the same metrics, with `seller_id` ("Seller ID", column narrowed so IDs show about 10 characters) as the dimension and its own filter "In rankings (sellers)": include `in_rankings` = true. Filters belong to one data source, so each table needs its own. Sort: a hidden chart-level field `late_order_rate * 1`, descending. Top 10 rows. Cross-filtering off.
 - Sellers by late orders table on `fct_seller_summary`: dimension `seller_id` ("Seller ID", narrowed the same way); metrics `orders` ("Orders"), `late_order_rate` ("Late-order rate", Percent, 2 decimals), `late_orders` ("Late orders", shown as bars). Filter "In rankings (sellers)". Sort: a hidden chart-level field `SUM(late_orders)`, descending. Top 10 rows. Cross-filtering off. It shows the evidence for the seller caption: the large seller with 172 late orders.
@@ -351,7 +361,7 @@ The M4-06 Reverse step rebuilt a copy of the report from mart tables only on Oct
 
 ### Rebuilding a data source
 
-After a data source is removed and re-added, charts can swap in other fields (for example `number_of_orders` or Record Count), lose their filters (shown as a pink broken filter) and lose their labels, so check every chip against this section. If a chart can't find the new source's fields, switch its data source to another one and back. Re-add the source and its calculated fields before reconnecting charts. "Make a copy" once failed with an `errorStatus` code 3 page; closing the browser and trying again worked.
+After a data source is removed and re-added, charts can swap in other fields (for example `number_of_orders` or Record Count), lose their filters (shown as a pink broken filter) and lose their labels, so check every chip against this section. If a chart can't find the new source's fields, switch its data source to another one and back. Re-add the source and its calculated fields before reconnecting charts. "Make a copy" once failed with an `errorStatus` code 3 page; closing the browser and trying again worked. The scorecard label text boxes aren't part of any data source, so re-adding a source doesn't remove them, but they must be moved with their cards.
 
 ### Captions
 
