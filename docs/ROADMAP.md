@@ -417,6 +417,7 @@ Grouped by the milestone each decision was made in, oldest first within each gro
 | M5 adds M5-12, a README header with a logo and badges. | The README had the right content but plain links, so a visitor couldn't see at a glance that the dashboard is live or that there's a video. The logo reuses the video thumbnail's three-dots idea, so the README, video and dashboard look like one project. |
 | The demo video runs about 2:30, not under 2:00. | Speaking at a calm pace with pauses, and explaining the two seller rankings clearly, took longer than planned. 2:30 is still short enough to watch in full, so re-recording wasn't worth it. |
 | M5-05's video link went in through M5-12's Demo badge, so one pull request closes both. | The badge row replaces the plain dashboard link, so a separate pull request would have added a line only to remove it. |
+| The visible work finished on October 31, 2026, about two months before the December target. | With M5-05 and M5-12 merged, everything a visitor sees is done: the dashboard, memo, README and video. Only the December 18 rebuild (M5-06 and M4-07) is left, and it waits for the sandbox expiry dates. |
 
 ## 15. Later (not in current scope)
 
