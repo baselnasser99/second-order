@@ -307,6 +307,10 @@ Test: every scorecard shows the same number as before (96,096; 2,997; 3.12%; 269
 Add a header to the top of the README: a logo with the "Second Order" wordmark, the tagline, and a row of badges for the live dashboard, the demo video and the data source, replacing the plain dashboard link line. The logo reuses the thumbnail's idea, three teal dots among 100, as one SVG in `docs/images/` whose colours (`#0D9488` and `#9CA3AF`, from the pie chart) read on both GitHub themes, with the wordmark's letters drawn as shapes, because GitHub doesn't load fonts inside SVG images. Badges are static shields.io images, each linking to its page. Everything below the header stays as it is. The M5-01 and M5-08 wording rules still apply. Merged before December 18, so M5-06 tests it.
 Test: on GitHub in light mode, dark mode and at phone width, the logo is sharp and readable, every badge shows and opens the right page, and the diff changes only the header. Reverse: n/a.
 
+**M5-13 · Sharpen the central claim**
+The memo and README say return rates stay near 2% "whatever" the first experience, which reads as evidence of no effect. The data only shows no clear evidence of one. Add to `docs/metrics.md`, with the SQL: 95% confidence intervals for the late and on-time 180-day return rates and their difference; the share of full-follow-up people whose first order was late; and how much the overall 180-day return rate would rise if every late first order had returned at the on-time rate, at the measured gap and at the top of the interval. Add the existing sensitivity check as a line: leaving out the 900 people whose first order was canceled or unavailable moves the rate from 1.99% to 2.00%. Reword the memo and README to say there's no clear difference, and that even if late delivery lowers returns, late first orders are too few to move the overall rate much. Add to Limits that the data ends in 2018, so the recommendations are what Olist could have tested then, and that 180 days may be short for products people rarely rebuy. Every new number appears in `docs/metrics.md`. Merged before December 18, so M5-06 tests it.
+Test: every number in the memo and README matches `docs/metrics.md`; neither says or implies that the first experience has no effect; the dashboard captions are checked against the new wording. Reverse: n/a.
+
 ---
 
 ## 14. Decision log
@@ -419,9 +423,14 @@ Grouped by the milestone each decision was made in, oldest first within each gro
 | M5-05's video link went in through M5-12's Demo badge, so one pull request closes both. | The badge row replaces the plain dashboard link, so a separate pull request would have added a line only to remove it. |
 | The README logo is one SVG in mid-tone colours, not a light and dark pair. | A `<picture>` switch follows the browser's theme, not GitHub's, so a visitor with different settings saw the wrong logo. Teal `#0D9488` and grey `#9CA3AF` read on both backgrounds, and there's one file to keep up to date. The grey dots are partly see-through, so they turn pale on white and dim on dark, and the three teal dots stand out on both. |
 | The visible work finished on October 31, 2026, about two months before the December target. | With M5-05 and M5-12 merged, everything a visitor sees is done: the dashboard, memo, README and video. Only the December 18 rebuild (M5-06 and M4-07) is left, and it waits for the sandbox expiry dates. |
+| M5 adds M5-13 after an outside review of the project. | The review pointed out that similar return rates are no clear evidence of an effect, not evidence of no effect. The recommendation still holds, for a better reason: late first orders are too few to move the overall rate. |
+| CI doesn't run the dbt models against data. | It would need cloud credentials in GitHub or a second copy of the SQL for another database, and both undo a core design choice. Every local `dbt build` runs all data tests, and the M5-06 rebuild proves a fresh setup works. |
+| The dashboard stays a documented manual rebuild. | Data Studio has no version-controlled format, and a template would still need connecting by hand. `docs/metrics.md` section 5 lists every setting, and the report was rebuilt from it once in M4-06. |
 
 ## 15. Later (not in current scope)
 
 - Cloud Storage raw bucket (needs billing + budget alert; free only in us-east1/us-west1/us-central1)
 - Scheduled pipeline runs
 - Azure exposure
+- Fixture-based dbt tests that run the models in CI without cloud credentials
+- A dashboard built in code, so it can be version-controlled
