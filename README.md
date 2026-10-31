@@ -1,12 +1,14 @@
-# Second Order
+<img src="docs/images/logo.svg" alt="Second Order" width="420">
 
 *Why Olist customers don't come back*
 
+[![Dashboard: live](https://img.shields.io/badge/Dashboard-live-0F766E)](https://datastudio.google.com/reporting/141992e1-ccfd-4563-8066-0bb982a5971b)
+[![Demo: 2½ minutes](https://img.shields.io/badge/Demo-2%C2%BD%20minutes-0F766E?logo=youtube&logoColor=white)](https://youtu.be/TfjrmG5UTJk)
+[![Data: Olist on Kaggle](https://img.shields.io/badge/Data-Olist%20on%20Kaggle-0F766E)](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
+
 I wanted to know where Olist, a Brazilian online marketplace, loses customers and money, and what it should fix first. Only about 3 in 100 people ever placed a second order (2,997 of 96,096), and among people I could follow for 180 days, about 2 in 100 came back whether their first order arrived late or on time. Olist should first test ways to win that second order, starting from today's 180-day return rate of 1.99%.
 
-**[Open the live dashboard](https://datastudio.google.com/reporting/141992e1-ccfd-4563-8066-0bb982a5971b)** (view-only, no sign-in needed)
-
-I built a data pipeline and this two-page dashboard to answer it.
+I built a data pipeline and a two-page dashboard (view-only, no sign-in needed) to answer that question.
 
 ```mermaid
 %%{init: {"themeVariables": {"pie1": "#9CA3AF", "pie2": "#0D9488"}}}%%
