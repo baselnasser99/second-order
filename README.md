@@ -6,7 +6,7 @@
 [![Demo: 2½ minutes](https://img.shields.io/badge/Demo-2%C2%BD%20minutes-0F766E?logo=youtube&logoColor=white)](https://youtu.be/TfjrmG5UTJk)
 [![Data: Olist on Kaggle](https://img.shields.io/badge/Data-Olist%20on%20Kaggle-0F766E)](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
 
-I wanted to know where Olist, a Brazilian online marketplace, loses customers and money, and what it should fix first. Only about 3 in 100 people ever placed a second order (2,997 of 96,096), and among people I could follow for 180 days, about 2 in 100 came back whether their first order arrived late or on time. Olist should first test ways to win that second order, starting from today's 180-day return rate of 1.99%.
+I wanted to know where Olist, a Brazilian online marketplace, loses customers and money, and what it should fix first. Only about 3 in 100 people ever placed a second order (2,997 of 96,096), and among people I could follow for 180 days, about 2 in 100 came back, with no clear difference between late and on-time first orders. Olist should first test ways to win that second order, starting from today's 180-day return rate of 1.99%.
 
 I built a data pipeline and a two-page dashboard (view-only, no sign-in needed) to answer that question.
 
@@ -19,7 +19,7 @@ pie title 96,096 people who ordered from Olist
 
 ## What I found
 
-**Customers rarely come back, whatever their first experience.** Of 96,096 people, only 2,997 (3.12%) ever placed a second order. Among people followed for a full 180 days, about 2% came back, whether their first order arrived late (1.69%) or on time (2.02%), and whatever review score they gave it.
+**Customers rarely come back, even after an on-time first order.** Of 96,096 people, only 2,997 (3.12%) ever placed a second order. Among people followed for a full 180 days, those whose first order arrived late came back a little less often (1.69%) than those whose order was on time (2.02%), but the gap is small enough to be chance. Even if late delivery does lower returns, only about 6 in 100 first orders were late: if every one had come back at the on-time rate, the overall rate would rise by only about 0.05 percentage points, even at the top of the likely range. Return rates by first-order review score, from 1 to 5, were all between 1.5% and 2.2%.
 
 **The sellers with the most late orders are large ones, not the small sellers with the highest late rates (the top one has 14 late orders).** One large seller at 9.71% has 172 late orders, more than the 10 highest-rate sellers combined (140).
 
@@ -39,7 +39,7 @@ The [memo](docs/memo.md) has the full version.
 
 ![The Customers page of the Second Order dashboard](docs/images/customers-page.png)
 
-*The Customers page: of 96,096 people, only 2,997 ordered again, and the 180-day return rate stays near 2% whether the first order was late or on time, and whatever review score it got.*
+*The Customers page: of 96,096 people, only 2,997 ordered again, and the 180-day return rate stays near 2% for late and on-time first orders alike, with no clear difference between them.*
 
 ![The Money page of the Second Order dashboard](docs/images/money-page.png)
 
@@ -73,6 +73,8 @@ flowchart TD
 ## Limits
 
 - The data covers 2016 to 2018-08-21. It shows patterns, not causes.
+- The data ends in 2018, so the recommendations are what Olist could have tested then, not current advice.
+- 180 days may be short for products people rarely rebuy, such as furniture.
 - It has no refunds, so payments on canceled orders can't be called losses.
 - It has no seller names, only seller ID codes.
 
