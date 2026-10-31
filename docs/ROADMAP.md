@@ -99,7 +99,7 @@ Closes with M4-07, the first rebuild before the sandbox expiry around December 2
 Test: hand-check 2–3 numbers against raw data. Reverse: rebuild dashboard using only mart tables. Every chart has a one-sentence caption.
 
 ### Milestone 5 — Insights & Delivery (≈ 10 hours · target: late December 2026)
-**Goal:** memo, README (finding first, setup last), architecture diagram, 2-minute demo video.
+**Goal:** memo, README (finding first, setup last), architecture diagram, demo video under 3 minutes.
 The demo video can be recorded any time the tables are live; it doesn't wait for M4-07. The project counts as finished when M5 is merged; later rebuilds are maintenance.
 Test: a non-technical friend reads the README and explains the finding back. Reverse: follow your own README on a fresh clone and rebuild everything.
 
@@ -275,9 +275,9 @@ Test: a non-technical friend reads the README and explains the finding back in t
 Change the report from Restricted to "anyone with the link can view". Never give edit access. Turn off downloading, copying and printing for viewers. Add the link to the README. Record the sharing settings in the decision log, including that viewers' chart queries count against the owner's free 1 TB a month.
 Test: open the link in a private browser window while logged out; every chart shows data, there's no edit button, and your email doesn't appear anywhere on the page. Reverse: n/a.
 
-**M5-05 · Two-minute demo video**
+**M5-05 · Demo video under 3 minutes**
 Write the script first: the finding (20 seconds), a walk through both dashboard pages (60 seconds), how the pipeline works (25 seconds), and what Olist should do next (15 seconds). Record on the live tables, hosted unlisted (for example on YouTube) and linked from the README, never committed to the repo. No email, avatar, project ID or terminal history on screen.
-Test: the video is under 2:00; watch it through once only to check for personal details. Reverse: n/a.
+Test: the video is under 3:00; watch it through once only to check for personal details. Reverse: n/a.
 
 **M5-06 · Fresh-clone rebuild from the README (December 18, also the first M4-07 rebuild)**
 First, check every table's expiration date in the BigQuery console and write them down. Then clone the repo into a new folder outside `second-order` and follow only the README to set up and rebuild: environment, `.env`, `profiles.yml` from the example, load raw with `scripts/load.py`, `dbt build`, `scripts/check_counts.py`. This is also the first real run of `load.py` with the M3-10 project ID check. Write down every step where you had to guess or use something the README doesn't say. Fix the README from your usual `second-order` folder, not the fresh clone, because the clone has no local excludes or `commit-msg` hook. Delete the fresh clone afterwards, since it holds a `.env`. Check the expiration dates again: if replacing a table's data didn't reset its expiry, find another way before the old date passes (raw around December 25, dbt a day later). Set a calendar reminder for the next rebuild, about 55 days later (around February 11, 2027). Close M4-07 and M5-06 together. Update the M4 and M5 lines in `docs/how-it-was-built.md` with their actual finish dates.
@@ -302,6 +302,10 @@ Test: in a private window, logged out: the repo page shows the description, webs
 **M5-11 · Scorecard refresh**
 Restyle the dashboard's four scorecards by hand in Data Studio so the headline numbers stand out: People, Repeat customers and Repeat rate on Customers, and At-risk payments on Money. For example: a light teal background, a larger number with a smaller grey label, and rounded corners or a soft border, kept to the existing teal `#0F766E` and Roboto. Styling only: no new metrics, fields, filters or data sources, and every number stays the same. Update the Design paragraph in `docs/metrics.md` section 5 so a rebuild gets the same look. Retake both screenshots (Chrome DevTools device toolbar, device pixel ratio 2, "Capture screenshot", cropped to the canvas), check that neither shows an email, avatar or project ID, and replace `docs/images/customers-page.png` and `docs/images/money-page.png`. Done before M5-05, so the video shows the final look.
 Test: every scorecard shows the same number as before (96,096; 2,997; 3.12%; 269,735.11); both pages load in a private window while logged out; the README on GitHub shows the new screenshots in light and dark mode. Reverse: n/a.
+
+**M5-12 · README header and badges**
+Add a header to the top of the README: a logo with the "Second Order" wordmark, the tagline, and a row of badges for the live dashboard, the demo video and the data source, replacing the plain dashboard link line. The logo reuses the thumbnail's idea, three teal dots among 100 in `#0F766E` (lightened to `#14B8A6` on dark backgrounds), with a light and a dark version shown through `<picture>` so it reads well in both GitHub themes. Logo files are SVG in `docs/images/`, with the wordmark's letters drawn as shapes, because GitHub doesn't load fonts inside SVG images. Badges are static shields.io images, each linking to its page. Everything below the header stays as it is. The M5-01 and M5-08 wording rules still apply. Merged before December 18, so M5-06 tests it.
+Test: on GitHub in light mode, dark mode and at phone width, the logo is sharp and readable, every badge shows and opens the right page, and the diff changes only the header. Reverse: n/a.
 
 ---
 
@@ -410,6 +414,9 @@ Grouped by the milestone each decision was made in, oldest first within each gro
 | Scorecard labels are separate text boxes, and the cards use a fixed 48px number. | Data Studio sizes a scorecard's own label with its number, so the label was as large as the number. A separate 14px label lets the number lead, and a fixed size keeps all four numbers the same size. |
 | ROADMAP.md moved to `docs/ROADMAP.md`, and `docs/how-it-was-built.md` sums up the build on one page. | A visitor should meet the finding, not the plan. The move was a commit of its own, merged with a merge commit rather than a squash, so git keeps the file's history. M5-06 adds the actual M4 and M5 finish dates to the page. |
 | M5-10 was done by hand on GitHub, with no pull request. | It changed only GitHub settings: milestone summaries, the board's default view, the About section and the profile pin. No files changed, so this row is its record. |
+| M5 adds M5-12, a README header with a logo and badges. | The README had the right content but plain links, so a visitor couldn't see at a glance that the dashboard is live or that there's a video. The logo reuses the video thumbnail's three-dots idea, so the README, video and dashboard look like one project. |
+| The demo video runs about 2:30, not under 2:00. | Speaking at a calm pace with pauses, and explaining the two seller rankings clearly, took longer than planned. 2:30 is still short enough to watch in full, so re-recording wasn't worth it. |
+| M5-05's video link went in through M5-12's Demo badge, so one pull request closes both. | The badge row replaces the plain dashboard link, so a separate pull request would have added a line only to remove it. |
 
 ## 15. Later (not in current scope)
 
