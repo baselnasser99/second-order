@@ -1,7 +1,4 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/logo-dark.svg">
-  <img src="docs/images/logo-light.svg" alt="Second Order" width="420">
-</picture>
+<img src="docs/images/logo.svg" alt="Second Order" width="420">
 
 *Why Olist customers don't come back*
 
