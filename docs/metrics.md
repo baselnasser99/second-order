@@ -70,6 +70,124 @@ Result: 1,116 / 56,007 = 1.99%.
 
 Page 1 splits this rate by `first_order_is_late` (late vs on time) and by `first_order_review_score` (1–5), with `people_with_full_followup` shown next to each rate as the group size. People whose first order has no delivery date or no review have NULL in that column and drop out of that chart.
 
+#### How sure the late vs on-time comparison is
+
+These queries were run as written on Oct 31, 2026 (M5-13). A 95% confidence interval is the range a rate could reasonably be in, given how many people it's based on: if the same measurement were repeated on many new groups of customers, about 95 in 100 of those ranges would contain the true rate. Each interval here uses the normal approximation: rate ± 1.96 × standard error, where the standard error of a rate is the square root of rate × (1 − rate) / people.
+
+**Return rate and 95% confidence interval by first-order timing.** Full-follow-up people with a known first-order timing only.
+
+```sql
+WITH rates AS (
+  SELECT
+    first_order_is_late,
+    COUNT(*) AS people,
+    COUNTIF(returned_within_180_days) AS returned,
+    COUNTIF(returned_within_180_days) / COUNT(*) AS return_rate
+  FROM `ecommerce_dbt.dim_customers`
+  WHERE has_full_followup AND first_order_is_late IS NOT NULL
+  GROUP BY first_order_is_late
+)
+SELECT
+  *,
+  return_rate - 1.96 * SQRT(return_rate * (1 - return_rate) / people) AS interval_low,
+  return_rate + 1.96 * SQRT(return_rate * (1 - return_rate) / people) AS interval_high
+FROM rates
+```
+
+| First order | People | Returned | 180-day return rate | 95% confidence interval |
+|---|---|---|---|---|
+| Late | 3,317 | 56 | 1.69% | 1.25% to 2.13% |
+| On time | 50,681 | 1,026 | 2.02% | 1.90% to 2.15% |
+
+**The gap between them.** The on-time rate minus the late rate. Its standard error is the square root of the sum of each group's rate × (1 − rate) / people. `COUNTIF(NOT first_order_is_late)` skips people with no timing, because NOT of a NULL value isn't true.
+
+```sql
+WITH rates AS (
+  SELECT
+    COUNTIF(first_order_is_late) AS late_people,
+    COUNTIF(first_order_is_late AND returned_within_180_days) / COUNTIF(first_order_is_late) AS late_rate,
+    COUNTIF(NOT first_order_is_late) AS on_time_people,
+    COUNTIF(NOT first_order_is_late AND returned_within_180_days) / COUNTIF(NOT first_order_is_late) AS on_time_rate
+  FROM `ecommerce_dbt.dim_customers`
+  WHERE has_full_followup
+),
+gap AS (
+  SELECT
+    on_time_rate - late_rate AS difference,
+    SQRT(on_time_rate * (1 - on_time_rate) / on_time_people + late_rate * (1 - late_rate) / late_people) AS standard_error
+  FROM rates
+)
+SELECT
+  difference,
+  standard_error,
+  difference - 1.96 * standard_error AS interval_low,
+  difference + 1.96 * standard_error AS interval_high
+FROM gap
+```
+
+Result: a gap of 0.34 percentage points (standard error 0.23), with a 95% confidence interval of −0.12 to +0.79 points. The rounded rates above give 0.33; the unrounded rates (2.0244% and 1.6883%) give 0.34. The interval includes 0, so the data shows no clear difference between the two groups. It doesn't rule out a real gap of up to about 0.8 points either.
+
+**Share of first orders that were late.** Full-follow-up people with a known first-order timing.
+
+```sql
+SELECT
+  COUNTIF(first_order_is_late) AS late_people,
+  COUNT(first_order_is_late) AS people_with_known_timing,
+  COUNTIF(first_order_is_late) / COUNT(first_order_is_late) AS late_share
+FROM `ecommerce_dbt.dim_customers`
+WHERE has_full_followup
+```
+
+Result: 3,317 of 53,998 = 6.14%, about 6 in 100.
+
+**How much late first orders could move the overall rate.** If every late first order had returned at the on-time rate, the overall 180-day return rate would rise by late people × gap / 56,007, shown here in percentage points, once with the measured gap and once with the top of its interval.
+
+```sql
+WITH rates AS (
+  SELECT
+    COUNT(*) AS people_with_full_followup,
+    COUNTIF(first_order_is_late) AS late_people,
+    COUNTIF(first_order_is_late AND returned_within_180_days) / COUNTIF(first_order_is_late) AS late_rate,
+    COUNTIF(NOT first_order_is_late) AS on_time_people,
+    COUNTIF(NOT first_order_is_late AND returned_within_180_days) / COUNTIF(NOT first_order_is_late) AS on_time_rate
+  FROM `ecommerce_dbt.dim_customers`
+  WHERE has_full_followup
+),
+gap AS (
+  SELECT
+    *,
+    on_time_rate - late_rate AS difference,
+    on_time_rate - late_rate
+      + 1.96 * SQRT(on_time_rate * (1 - on_time_rate) / on_time_people + late_rate * (1 - late_rate) / late_people) AS difference_high
+  FROM rates
+)
+SELECT
+  people_with_full_followup,
+  late_people,
+  100 * late_people * difference / people_with_full_followup AS rise_points_at_measured_gap,
+  100 * late_people * difference_high / people_with_full_followup AS rise_points_at_interval_top
+FROM gap
+```
+
+Result: 0.02 percentage points at the measured gap, and 0.05 at the top of its interval. Late first orders are too few to move the overall rate (1.99%) much, even if late delivery does lower returns.
+
+**Sensitivity: first orders that were canceled or unavailable.** Leaving out the people whose first order was canceled or unavailable (decision log, M4).
+
+```sql
+SELECT
+  COUNTIF(o.order_status IN ('canceled', 'unavailable')) AS people_left_out,
+  COUNTIF(o.order_status NOT IN ('canceled', 'unavailable')) AS people_kept,
+  COUNTIF(o.order_status NOT IN ('canceled', 'unavailable') AND c.returned_within_180_days) AS returned,
+  COUNTIF(o.order_status NOT IN ('canceled', 'unavailable') AND c.returned_within_180_days)
+    / COUNTIF(o.order_status NOT IN ('canceled', 'unavailable')) AS return_rate_180_days
+FROM `ecommerce_dbt.dim_customers` AS c
+JOIN `ecommerce_dbt.fct_orders` AS o
+  ON o.order_id = c.first_order_id
+WHERE c.has_full_followup
+```
+
+Result: 900 people left out; 1,100 of the remaining 55,107 returned = 2.00%, against 1.99% with them in.
+
 ## 2. Orders (`fct_orders`)
 
 One row per order.
