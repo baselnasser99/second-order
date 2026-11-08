@@ -426,6 +426,7 @@ Grouped by the milestone each decision was made in, oldest first within each gro
 | M5 adds M5-13 after an outside review of the project. | The review pointed out that similar return rates are no clear evidence of an effect, not evidence of no effect. The recommendation still holds, for a better reason: late first orders are too few to move the overall rate. |
 | CI doesn't run the dbt models against data. | It would need cloud credentials in GitHub or a second copy of the SQL for another database, and both undo a core design choice. Every local `dbt build` runs all data tests, and the M5-06 rebuild proves a fresh setup works. |
 | The dashboard stays a documented manual rebuild. | Data Studio has no version-controlled format, and a template would still need connecting by hand. `docs/metrics.md` section 5 lists every setting, and the report was rebuilt from it once in M4-06. |
+| The README logo wordmark is Inter Display Semibold drawn as shapes, with "Second" in grey `#6B7280` and "Order" in teal `#0D9488`. | Inter is an open font whose licence allows logo use, so its letters can be drawn as shapes and look the same for every visitor. The pie chart grey `#9CA3AF` is too faint for text on white, and `#6B7280` reads on both GitHub themes. The 100 dots keep `#9CA3AF`, with the three teal dots made larger so they stand out. |
 
 ## 15. Later (not in current scope)
 
